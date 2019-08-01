@@ -51,6 +51,7 @@
             if(this.json.shell) {
                this.fillCls()
             }
+
             return this.json.children
         }
 
@@ -79,8 +80,10 @@
         fillCls(){
            get_Cls(this).then(data => {
                 this.json.children = data.entities[0].children
+                this.json.parents = data.entities[0].parents
+                this.json.shell = data.entities[0].shell
            })
-    }
+        }
 
     }
 
@@ -238,20 +241,16 @@
                         select: function(tmp) {
                             var json = tmp.json()
                             var object = json.data.object
-                            object.children
-                            console.log(object)
+                            var children =  object.children
+                            console.log(children)
                           //these are all children from the node
                          /* if(children) {
                             //console.log("children:")
                             //console.log(children)
-                            children.forEach(function(element){
-                              //console.log(element.name)
-                              });
-                            /*for (const p of children) {
+                            for (const p of children) {
                               var children_cls = new Ontology_class(p); // set flag to fill object
-                                cy.add([{group: 'nodes', data: {id: children_cls.id, label: children_cls.label, json: children_cls}},
+                                cy.add([{group: 'nodes', data: {id: children_cls.id, label: children_cls.label, object: children_cls}},
                                     {group: 'edges', data: {source: children_cls.id, target: label.data.id}}]);
-                                    console.log(children_cls.label);
                             }
                             cy.layout({
                                 name: 'cose'
