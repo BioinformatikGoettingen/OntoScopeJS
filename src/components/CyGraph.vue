@@ -20,20 +20,44 @@
     import CyObj from '@/components/cy-object'
     import cxtmenu from 'cytoscape-cxtmenu'
 
+    //load the class given as argument
+    function get_Cls(Cls) {
+        var url = "http://oba.sybig.de";
+        var ontology = "tribolium";
+        var searchString = Cls.label;
+        axios.defaults.headers = {
+            'Accept': 'application/json'
+        };
+         return axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
+           .then(function (response) {
+               return response.data
+           });
+
+    }
+
 
     class Ontology_class {
 
         constructor(json) {
             this.json = json;
+            //var shell = this.json.shell
+            //var children = this.json.children
         }
 
         get children() {
-
+            if(!this.json.shell && this.json.children.length == 0){
+                return null;
+            }
+            if(this.json.shell) {
+               this.fillCls()
+            }
+            return this.json.children
         }
 
         get id() {
             return this.json.name;
         }
+
 
         get label() {
             // later on switch between name of the class or label annotation
@@ -51,6 +75,13 @@
         get name() {
           return this.json.label;
         }
+        //here we now need to overwrite this.json data
+        fillCls(){
+           get_Cls(this).then(data => {
+                this.json.children = data.entities[0].children
+           })
+    }
+
     }
 
     /* eslint-disable */
@@ -75,19 +106,17 @@
         ]
     };
 
-    function add_first(json_response, cy, children = false) {
+    function add_first(json_response, cy) {
         //temporary function to add the first node, will be replaced by a selection list
         //console.log("add first node from search result")
         if (json_response.status !== 200 || json_response.data.entities.length < 1) {
-            console.log("no entities found")
+            console.log("no entities found");
             return;
         }
         var onto_cls = new Ontology_class(json_response.data.entities[0]);
-        if(children) {
-          add_node_with_children(onto_cls, cy);
-        }else {
-          add_node_with_parents(onto_cls, cy);
-        }
+
+          add_data(onto_cls, cy);
+
 
     }
 
@@ -105,6 +134,22 @@
             cy.layout({
                 name: 'cose'
             }).run();
+        })
+    }
+
+    function add_data(onto_cls, cyInst) {
+        console.log("right path boi");
+      cyInst.then(cy => {
+        cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, object: onto_cls}}]);
+        for (const p of onto_cls.json.parents) {
+            var parent_cls = new Ontology_class(p); // set flag to fill object
+            //var searchString = parent_cls.label
+            cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
+                {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
+        }
+        cy.layout({
+            name: 'cose'
+        }).run();
         })
     }
 
@@ -128,23 +173,18 @@
 
 
 
-    function load_node(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
+    /*function load_node(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
           var strr = [];
           axios.defaults.headers = {
               'Accept': 'application/json'
-          }
+          };
           axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
               .then(function (response) {
               strr.push(response.data.entities[0])
 
               });
               return strr;
-    }
-
-    function testneu() {
-      return "yes"
-    }
-
+    }*/
 
     export default {
         name: "CyGraph",
@@ -165,7 +205,7 @@
 
             },
             afterCreated(cy) {
-              console.log(cy)
+              console.log(cy);
                 let menu2 = this.$refs.menu;
                 //cy.on("dragfree", "node", evt => this.setCyElements(cy));
                 // cy.on('tap', 'node', function (event) {
@@ -176,40 +216,38 @@
                 //
                 // })
                 cy.on('tap', 'node', function (event) {
-                  var node = event.target.json()
-                  console.log(node.data.data)
-                })
+                  var node = event.target.json();
+                  console.log(node.data.object)
+                });
                 //if nodes need different context menue, we need to create a cy.cxtmenu for each type of node
                 let menu = cy.cxtmenu({selector: 'node',
                     commands: [
                     {
-                        content: "load node",
+                        content: "load object",
                         fillColor: 'green',
                         select: function(tmp) {
-                            var label = tmp.json()
-                            var name = label.data.label
-                            var test = new Ontology_class(load_node(name));
-                            console.log(test)
-
+                            var json = tmp.json()
+                            var object = json.data.object
+                            object.children
                         }
                     },
                     {
                         content: 'get children',
                         fillColor: "blue",
+                        //load children from node, cia the children getter
                         select: function(tmp) {
-                          var label = tmp.json();
-                          var children = label.data.children;
-                          var data = label.data.data;
-                          console.log("data:")
-                          console.log(data);
+                            var json = tmp.json()
+                            var object = json.data.object
+                            object.children
+                            console.log(object)
                           //these are all children from the node
-                          if(children) {
+                         /* if(children) {
                             //console.log("children:")
                             //console.log(children)
                             children.forEach(function(element){
                               //console.log(element.name)
-                              })
-                            for (const p of children) {
+                              });
+                            /*for (const p of children) {
                               var children_cls = new Ontology_class(p); // set flag to fill object
                                 cy.add([{group: 'nodes', data: {id: children_cls.id, label: children_cls.label, json: children_cls}},
                                     {group: 'edges', data: {source: children_cls.id, target: label.data.id}}]);
@@ -220,7 +258,7 @@
                                 }).run();
                           }else {
                             console.log("no children to display!")
-                          }
+                          }*/
                         //  var onto_cls = new Ontology_class(tmp);
 
 
@@ -228,20 +266,23 @@
                         }
                     },
                     {
-                        content: 'name',
+                        content: 'show object',
                         select (tmp) {
-                        var label = tmp.json()
-                        console.log(label.data.label)               }
+                            var json = tmp.json();
+                            var data = json.data;
+                            var object = data.object;
+                            console.log(object)
+                        }
                     },
                     {
                     content: 'get data',
                     select (tmp) {
-                      var data = tmp.json()
+                      var data = tmp.json();
                       console.log(data)
                     }
                     }
                     ]
-                })
+                });
 
                 //cy.cxtmenu({selector: 'core',
                   //  commands: [
@@ -274,17 +315,17 @@
 
             },
             cyKey () {
-                console.log("-------- cyKey")
-                const that = this
-                CyObj.reset()
+                console.log("-------- cyKey");
+                const that = this;
+                CyObj.reset();
                 CyObj.instance.then(cy => {
-                    console.log('cy', cy)
+                    console.log('cy', cy);
                     cy.on('tap', event => {
-                        console.log('tapped')
+                        console.log('tapped');
                         that.i++
                     })
-                })
-                console.log('computing cyKey cy' + this.i)
+                });
+                console.log('computing cyKey cy' + this.i);
                 return 'cy' + this.i
             },
             setCyElements(cy) {
@@ -317,8 +358,8 @@
                 console.log(this.$refs);
                 axios.defaults.headers = {
                     'Accept': 'application/json'
-                }
-                var cy = this.$cytoscape.instance
+                };
+                var cy = this.$cytoscape.instance;
                 axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
                     .then(function (response) {
 
