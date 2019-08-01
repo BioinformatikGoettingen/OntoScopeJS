@@ -45,14 +45,16 @@
         }
 
         get children() {
+
             if(!this.json.shell && this.json.children.length == 0){
                 return null;
             }
-            if(this.json.shell) {
-               this.fillCls()
+            if(!this.json.shell) {
+                return this.json.children
+            }else {
+                this.fillCls()
+                return this.json.children
             }
-
-            return this.json.children
         }
 
         get id() {
@@ -141,7 +143,6 @@
     }
 
     function add_data(onto_cls, cyInst) {
-        console.log("right path boi");
       cyInst.then(cy => {
         cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, object: onto_cls}}]);
         for (const p of onto_cls.json.parents) {
@@ -241,8 +242,14 @@
                         select: function(tmp) {
                             var json = tmp.json()
                             var object = json.data.object
-                            var children =  object.children
-                            console.log(children)
+                            object.children
+                            //load the children
+                            var newtmp = tmp.json()
+                            var newobject = newtmp.data.object
+                            console.log(newobject.json)
+                            console.log(newobject.json.shell)
+
+
                           //these are all children from the node
                          /* if(children) {
                             //console.log("children:")
