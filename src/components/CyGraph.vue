@@ -242,29 +242,33 @@
                         select: function(tmp) {
                             var json = tmp.json()
                             var object = json.data.object
-                            object.children
+                            var children = object.children
                             //load the children
                             var newtmp = tmp.json()
                             var newobject = newtmp.data.object
-                            console.log(newobject.json)
-                            console.log(newobject.json.shell)
+                            console.log(object)
+                            //hier liegt ein wiederspruch vor, deswegen muss auch zweimal geladen werden
+                            //console.log(newobject.json)
+                            //console.log(newobject.json.shell)
 
 
                           //these are all children from the node
-                         /* if(children) {
+                          if(children) {
                             //console.log("children:")
-                            //console.log(children)
+                            console.log(children)
                             for (const p of children) {
                               var children_cls = new Ontology_class(p); // set flag to fill object
+                                console.log(children_cls.label)
+
                                 cy.add([{group: 'nodes', data: {id: children_cls.id, label: children_cls.label, object: children_cls}},
-                                    {group: 'edges', data: {source: children_cls.id, target: label.data.id}}]);
+                                    {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
                             }
                             cy.layout({
                                 name: 'cose'
                                 }).run();
                           }else {
                             console.log("no children to display!")
-                          }*/
+                          }
                         //  var onto_cls = new Ontology_class(tmp);
 
 
