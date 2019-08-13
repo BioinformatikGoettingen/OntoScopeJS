@@ -40,28 +40,41 @@
 
         constructor(json) {
             this.json = json;
+            this.oc_children = json.children;
+            this.oc_annotations = json.annotations;
+            this.oc_name = json.name;
+            this.oc_namespace = json.namespace;
+            this.oc_parents = json.parents;
+            this.oc_shell = json.shell
             //var shell = this.json.shell
             //var children = this.json.children
         }
 
         get children() {
 
-            if(!this.json.shell && this.json.children.length == 0){
+            if(!this.json.shell && this._children.length == 0){
                 return null;
             }
-            if(!this.json.shell) {
-                return this.json.children
-            }else {
-                this.fillCls()
-                return this.json.children
-            }
+            if(this.json.shell) {
+                this.fillCls(this)
+                }
+            return this.json.children
         }
+
 
         get id() {
             return this.json.name;
         }
 
-
+        getChildren() {
+            if(!this.oc_shell && this.oc_children.length == 0){
+                return null;
+            }
+            if(this.oc_shell) {
+                this.fillCls(this)
+            }
+            return this.oc_children
+        }
         get label() {
             // later on switch between name of the class or label annotation
             // also switch language
@@ -75,16 +88,30 @@
             return this.json.name;
         }
 
+
         get name() {
           return this.json.label;
         }
         //here we now need to overwrite this.json data
-        fillCls(){
-           get_Cls(this).then(data => {
-                this.json.children = data.entities[0].children
-                this.json.parents = data.entities[0].parents
-                this.json.shell = data.entities[0].shell
-           })
+        fillCls(Cls){
+            var data = async function (
+                let output = await get_Cls(Cls)
+                return output
+        )
+
+            this.fillWithTemplate((data))
+          /* get_Cls(Cls).then(data => {
+               this.fillWithTemplate(data)
+           })*/
+        }
+        fillWithTemplate (data){
+            this.oc_children = data.entities[0].children;
+            this.oc_parents = data.entities[0].parents;
+            this.oc_shell = data.entities[0].shell;
+            this.oc_annotations =  data.entities[0].annotations;
+            this.oc_name = data.entities[0].name;
+            this.oc_namespace = data.entities[0].namespace;
+            this.json = data.entities[0]
         }
 
     }
@@ -119,7 +146,7 @@
             return;
         }
         var onto_cls = new Ontology_class(json_response.data.entities[0]);
-
+            console.log(onto_cls);
           add_data(onto_cls, cy);
 
 
@@ -208,8 +235,8 @@
                 cytoscape.use(cxtmenu);
 
             },
-            afterCreated(cy) {
-              console.log(cy);
+            afterCreated: function (cy) {
+                console.log(cy);
                 let menu2 = this.$refs.menu;
                 //cy.on("dragfree", "node", evt => this.setCyElements(cy));
                 // cy.on('tap', 'node', function (event) {
@@ -220,105 +247,110 @@
                 //
                 // })
                 cy.on('tap', 'node', function (event) {
-                  var node = event.target.json();
-                  console.log(node.data.object)
+                    var node = event.target.json();
+                    console.log(node.data.object)
                 });
                 //if nodes need different context menue, we need to create a cy.cxtmenu for each type of node
-                let menu = cy.cxtmenu({selector: 'node',
+                let menu = cy.cxtmenu({
+                    selector: 'node',
                     commands: [
-                    {
-                        content: "load object",
-                        fillColor: 'green',
-                        select: function(tmp) {
-                            var json = tmp.json()
-                            var object = json.data.object
-                            object.children
-                        }
-                    },
-                    {
-                        content: 'get children',
-                        fillColor: "blue",
-                        //load children from node, cia the children getter
-                        select: function(tmp) {
-                            var json = tmp.json()
-                            var object = json.data.object
-                            var children = object.children
-                            //load the children
-                            var newtmp = tmp.json()
-                            var newobject = newtmp.data.object
-                            console.log(object)
-                            //hier liegt ein wiederspruch vor, deswegen muss auch zweimal geladen werden
-                            //console.log(newobject.json)
-                            //console.log(newobject.json.shell)
-
-
-                          //these are all children from the node
-                          if(children) {
-                            //console.log("children:")
-                            console.log(children)
-                            for (const p of children) {
-                              var children_cls = new Ontology_class(p); // set flag to fill object
-                                console.log(children_cls.label)
-
-                                cy.add([{group: 'nodes', data: {id: children_cls.id, label: children_cls.label, object: children_cls}},
-                                    {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                        {
+                            content: "load object",
+                            fillColor: 'green',
+                            select: function (tmp) {
+                                var json = tmp.json();
+                                var object = json.data.object;
+                                object.getChildren();
+                                console.log(object);
+                                //console.log(object.getChildren());
                             }
-                            cy.layout({
-                                name: 'cose'
-                                }).run();
-                          }else {
-                            console.log("no children to display!")
-                          }
-                        //  var onto_cls = new Ontology_class(tmp);
+                        },
+                        {
+                            content: 'get children',
+                            fillColor: "blue",
+                            //load children from node, cia the children getter
+                            select: function (tmp) {
+                                var json = tmp.json();
+                                var object = json.data.object;
+                                var children = object.getChildren();
+                                var test = object.oc_children
+                                //console.log(object)
+                                //load the children
+                                //hier liegt ein widerspruch vor, deswegen muss auch zweimal geladen werden
+                                //console.log(newobject.json)
+                                //console.log(newobject.json.shell
+                                //these are all children from the node
+                                if (children) {
+                                    //console.log("children:")
+                                    for (const p of children) {
+                                        var children_cls = new Ontology_class(p); // set flag to fill object
+                                        cy.add([{
+                                            group: 'nodes',
+                                            data: {id: children_cls.id, label: children_cls.label, object: children_cls}
+                                        },
+                                            {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                    }
+                                    ////http://js.cytoscape.org/#collection/layout
+                                    cy.layout({
+                                        name: 'cose'
+                                    }).run();
+                                } else {
+                                    console.log("no children to display!")
+                                }
+                                //  var onto_cls = new Ontology_class(tmp);
 
 
+                            }
+                        },
+                        {
+                            content: 'show object',
+                            select: function (tmp) {
+                                var json = tmp.json();
+                                var data = json.data;
+                                var object = data.object;
+                                console.log(object)
+                            }
+                        },
 
+                        {
+                            content: 'get children length',
+                            select(tmp) {
+                                var json = tmp.json();
+                                var data = json.data;
+                                var object = data.object;
+                                var children = object.getChildren();
+                                console.log(object.oc_children);
+                                console.log(children.length)
+                            }
                         }
-                    },
-                    {
-                        content: 'show object',
-                        select (tmp) {
-                            var json = tmp.json();
-                            var data = json.data;
-                            var object = data.object;
-                            console.log(object)
-                        }
-                    },
-                    {
-                    content: 'get data',
-                    select (tmp) {
-                      var data = tmp.json();
-                      console.log(data)
-                    }
-                    }
                     ]
                 });
 
                 //cy.cxtmenu({selector: 'core',
-                  //  commands: [
-                  //  {
-                    //    content: 'bg1',
-                      //  select () {
-                        //    console.log('bg1')
-                        //}
-                    //},
-                      //  {
-                        //    content: 'bg2',
-                          //  select () {
-                            //    console.log('bg2')
-                            //}
-                        //}
-                    //]
+                //  commands: [
+                //  {
+                //    content: 'bg1',
+                //  select () {
+                //    console.log('bg1')
+                //}
+                //},
+                //  {
+                //    content: 'bg2',
+                //  select () {
+                //    console.log('bg2')
+                //}
+                //}
+                //]
                 //})
                 //cy.cxtmenu({selector: 'edge',
-                  //  commands: [
-                  //  {
-                    //    content: 'edgemenue',
-                      //  select () {
-                        //    console.log('bg1')
-                        //}
-                    //}
-                    //]
+                //  commands: [
+                //  {
+                //    content: 'edgemenue',
+                //  select () {
+                //    console.log('bg1')
+                //}
+                //}
+                //]
                 //})
                 this.setCyElements(cy);
                 // the default values of each option are outlined below:
