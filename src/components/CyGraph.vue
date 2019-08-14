@@ -7,8 +7,8 @@
                 :afterCreated="afterCreated"
                 :debug="true"
         />
-        <input id ="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
-        <button  id ="searchClassButton" v-on:click="search_for_class(searchTerm)" ref="mybutton">Search</button>
+        <input id="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
+        <button id="searchClassButton" v-on:click="search_for_class(searchTerm)" ref="mybutton">Search</button>
 
     </div>
 </template>
@@ -21,17 +21,29 @@
     import cxtmenu from 'cytoscape-cxtmenu'
 
     //load the class given as argument
-    function get_Cls(Cls) {
-        var url = "http://oba.sybig.de";
-        var ontology = "tribolium";
-        var searchString = Cls.label;
-        axios.defaults.headers = {
-            'Accept': 'application/json'
-        };
-         return axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
+    async function get_Cls(Cls) {
+        try {
+          var url = "http://oba.sybig.de";
+          var ontology = "tribolium";
+          var searchString = Cls.label;
+          axios.defaults.headers = {
+              'Accept': 'application/json'
+          };
+
+            return await axios ({
+                url: url + '/' + ontology + "/functions/basic/searchCls/" + searchString,
+                method: "get",
+                timeout: 8000
+            }).then(res => res.data)
+
+        } catch (err) {
+            console.log(err)
+        }
+        //return axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString);
+        /*return  axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
            .then(function (response) {
-               return response.data
-           });
+               return response
+           });*/
 
     }
 
@@ -52,12 +64,12 @@
 
         get children() {
 
-            if(!this.json.shell && this._children.length == 0){
+            if (!this.json.shell && this._children.length == 0) {
                 return null;
             }
-            if(this.json.shell) {
+            if (this.json.shell) {
                 this.fillCls(this)
-                }
+            }
             return this.json.children
         }
 
@@ -67,14 +79,15 @@
         }
 
         getChildren() {
-            if(!this.oc_shell && this.oc_children.length == 0){
+            if (!this.oc_shell && this.oc_children.length == 0) {
                 return null;
             }
-            if(this.oc_shell) {
-                this.fillCls(this)
+            if (this.oc_shell) {
+                this.fillCls()
             }
             return this.oc_children
         }
+
         get label() {
             // later on switch between name of the class or label annotation
             // also switch language
@@ -90,25 +103,30 @@
 
 
         get name() {
-          return this.json.label;
+            return this.json.label;
         }
-        //here we now need to overwrite this.json data
-        fillCls(Cls){
-            var data = async function (
-                let output = await get_Cls(Cls)
-                return output
-        )
 
-            this.fillWithTemplate((data))
-          /* get_Cls(Cls).then(data => {
-               this.fillWithTemplate(data)
-           })*/
+        //here we now need to overwrite this.json data
+        async fillCls() {
+            /*var response = async function () {
+                let newCls = await get_Cls(this).then(data => {
+                    var data2 = data.data
+                    this.fillWithTemplate(data2)})
+            }*/
+           let results = await Promise.all(get_Cls(this))
+           this.fillWithTemplate(results)
         }
-        fillWithTemplate (data){
+
+
+        /*
+        })*/
+
+
+        fillWithTemplate(data) {
             this.oc_children = data.entities[0].children;
             this.oc_parents = data.entities[0].parents;
             this.oc_shell = data.entities[0].shell;
-            this.oc_annotations =  data.entities[0].annotations;
+            this.oc_annotations = data.entities[0].annotations;
             this.oc_name = data.entities[0].name;
             this.oc_namespace = data.entities[0].namespace;
             this.json = data.entities[0]
@@ -146,8 +164,8 @@
             return;
         }
         var onto_cls = new Ontology_class(json_response.data.entities[0]);
-            console.log(onto_cls);
-          add_data(onto_cls, cy);
+        console.log(onto_cls);
+        add_data(onto_cls, cy);
 
 
     }
@@ -156,7 +174,10 @@
         //todo check if node is already in graph.
 
         cyInst.then(cy => {
-            cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label,  children: onto_cls.json.children, data: onto_cls}}]);
+            cy.add([{
+                group: 'nodes',
+                data: {id: onto_cls.id, label: onto_cls.label, children: onto_cls.json.children, data: onto_cls}
+            }]);
             for (const p of onto_cls.json.parents) {
                 var parent_cls = new Ontology_class(p); // set flag to fill object
                 //var searchString = parent_cls.label
@@ -170,38 +191,45 @@
     }
 
     function add_data(onto_cls, cyInst) {
-      cyInst.then(cy => {
-        cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, object: onto_cls}}]);
-        for (const p of onto_cls.json.parents) {
-            var parent_cls = new Ontology_class(p); // set flag to fill object
-            //var searchString = parent_cls.label
-            cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
-                {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
-        }
-        cy.layout({
-            name: 'cose'
-        }).run();
+        cyInst.then(cy => {
+            cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, object: onto_cls}}]);
+            for (const p of onto_cls.json.parents) {
+                var parent_cls = new Ontology_class(p); // set flag to fill object
+                //var searchString = parent_cls.label
+                cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
+                    {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
+            }
+            cy.layout({
+                name: 'cose'
+            }).run();
         })
     }
 
-    function add_node_with_children(onto_cls,cyInst) {
-      cyInst.then(cy => {
-        cy.add([{group:'nodes', data: {id:onto_cls.id, label: onto_cls.label, creation: onto_cls.created_by}}]);
-        for (const p of onto_cls.json.children) {
-          var children_cls = new Ontology_class(p); // set flag to fill object
-          //load data
-          // Problem: kein zugriff auf die daten
-        //  var children_cls_data = load_node(children_cls.label)
-          cy.add([{group: 'nodes', data: {id: children_cls.id, label: children_cls.label, data: children_cls_data , children: children_cls}},
-              {group: 'edges', data: {source: children_cls.id, target: onto_cls.id}}]);
+    function add_node_with_children(onto_cls, cyInst) {
+        cyInst.then(cy => {
+            cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, creation: onto_cls.created_by}}]);
+            for (const p of onto_cls.json.children) {
+                var children_cls = new Ontology_class(p); // set flag to fill object
+                //load data
+                // Problem: kein zugriff auf die daten
+                //  var children_cls_data = load_node(children_cls.label)
+                cy.add([{
+                    group: 'nodes',
+                    data: {
+                        id: children_cls.id,
+                        label: children_cls.label,
+                        data: children_cls_data,
+                        children: children_cls
+                    }
+                },
+                    {group: 'edges', data: {source: children_cls.id, target: onto_cls.id}}]);
 
-        }
-        cy.layout({
-          name:"cose"
-        }).run();
-      })
+            }
+            cy.layout({
+                name: "cose"
+            }).run();
+        })
     }
-
 
 
     /*function load_node(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
@@ -227,7 +255,7 @@
             };
         },
         components: {
-          //  cytoscape
+            //  cytoscape
         },
         methods: {
             preConfig(cytoscape) {
@@ -314,13 +342,13 @@
 
                         {
                             content: 'get children length',
-                            select(tmp) {
+                            select: function (tmp) {
                                 var json = tmp.json();
                                 var data = json.data;
                                 var object = data.object;
                                 var children = object.getChildren();
-                                console.log(object.oc_children);
-                                console.log(children.length)
+                                var length = children.length
+                                var test = "12"
                             }
                         }
                     ]
@@ -356,7 +384,7 @@
                 // the default values of each option are outlined below:
 
             },
-            cyKey () {
+            cyKey() {
                 console.log("-------- cyKey");
                 const that = this;
                 CyObj.reset();
@@ -373,19 +401,19 @@
             setCyElements(cy) {
                 console.log("setCyElements");
                 let cytoElems = [
-                     //{
-                         // node a
-                        // data: {id: "a"},
-                         //position: {x: 100, y: 100}
-                     //},
-                     //{
-                         // node b
-                         //data: {id: "b"},
-                         //position: {x: 200, y: 100}
-                     //},
-                     //{
-                         // edge ab
-                         //data: {id: "ab", source: "a", target: "b"}
+                    //{
+                    // node a
+                    // data: {id: "a"},
+                    //position: {x: 100, y: 100}
+                    //},
+                    //{
+                    // node b
+                    //data: {id: "b"},
+                    //position: {x: 200, y: 100}
+                    //},
+                    //{
+                    // edge ab
+                    //data: {id: "ab", source: "a", target: "b"}
                     // }
                 ];
                 cy.startBatch();
@@ -394,7 +422,7 @@
                     cy.add(el);
                 }
                 cy.endBatch();
-               cy.fit();
+                cy.fit();
             },
             search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
                 console.log(this.$refs);
@@ -409,7 +437,7 @@
                     });
             },
             test2() {
-            console.log("test")
+                console.log("test")
             },
 
         }
