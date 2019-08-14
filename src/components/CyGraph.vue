@@ -21,7 +21,7 @@
     import cxtmenu from 'cytoscape-cxtmenu'
 
     //load the class given as argument
-    async function get_Cls(Cls) {
+    function get_Cls(Cls) {
         try {
           var url = "http://oba.sybig.de";
           var ontology = "tribolium";
@@ -29,12 +29,11 @@
           axios.defaults.headers = {
               'Accept': 'application/json'
           };
-
-            return await axios ({
+            return axios ({
                 url: url + '/' + ontology + "/functions/basic/searchCls/" + searchString,
                 method: "get",
                 timeout: 8000
-            }).then(res => res.data)
+            })
 
         } catch (err) {
             console.log(err)
@@ -84,8 +83,12 @@
             }
             if (this.oc_shell) {
                 this.fillCls()
+                return this.oc_children
+              //  this.fillCls().then( data => { return this.oc_children}
+                //hier Promise.all mit getCls, fillCls, and fillWithTemplate
+            }else {
+                return this.oc_children
             }
-            return this.oc_children
         }
 
         get label() {
@@ -107,14 +110,202 @@
         }
 
         //here we now need to overwrite this.json data
-        async fillCls() {
+        fillCls() {
             /*var response = async function () {
                 let newCls = await get_Cls(this).then(data => {
                     var data2 = data.data
                     this.fillWithTemplate(data2)})
-            }*/
+            }
            let results = await Promise.all(get_Cls(this))
            this.fillWithTemplate(results)
+            return results
+
+            get_Cls(this).then(data => {
+                var data2 = data.data
+                this.fillWithTemplate(data2)
+            })*/
+            //console.log(get_Cls(this))
+           // get_Cls(this).then(data => {
+            //    var data2 = data.data
+
+                //this.fillWithTemplate(data2)
+            //})
+            /*var data2 =
+                    {
+                        "shell": false,
+                        "name": "TrOn_0000007",
+                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                        "annotations": [
+                            {
+                                "language": "",
+                                "name": "created_by",
+                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                "value": "juergen"
+                            },
+                            {
+                                "language": "",
+                                "name": "xref",
+                                "namespace": "http://www.geneontology.org/formats/oboInOwl#",
+                                "value": "FBbt:00007000"
+                            },
+                            {
+                                "language": "",
+                                "name": "label",
+                                "namespace": "http://www.w3.org/2000/01/rdf-schema#",
+                                "value": "appendage"
+                            },
+                            {
+                                "language": "",
+                                "name": "creation_date",
+                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                "value": "2011-05-10T02:30:33Z"
+                            }
+                        ],
+                        "children": [
+                            {
+                                "shell": true,
+                                "name": "TrOn_0000008",
+                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                "annotations": [
+                                    {
+                                        "language": "",
+                                        "name": "label",
+                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
+                                        "value": "leg"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "created_by",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "juergen"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "creation_date",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "2011-05-10T02:31:26Z"
+                                    }
+                                ],
+                                "children": [],
+                                "parents": []
+                            },
+                            {
+                                "shell": true,
+                                "name": "TrOn_0000696",
+                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                "annotations": [
+                                    {
+                                        "language": "",
+                                        "name": "created_by",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "Daniela"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "creation_date",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "2011-06-28T05:05:47Z"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "label",
+                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
+                                        "value": "gnathal_appendage"
+                                    }
+                                ],
+                                "children": [],
+                                "parents": []
+                            },
+                            {
+                                "shell": true,
+                                "name": "TrOn_0000697",
+                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                "annotations": [
+                                    {
+                                        "language": "",
+                                        "name": "created_by",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "Daniela"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "label",
+                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
+                                        "value": "procephalic_appendage"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "creation_date",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "2011-06-28T05:05:47Z"
+                                    }
+                                ],
+                                "children": [],
+                                "parents": []
+                            },
+                            {
+                                "shell": true,
+                                "name": "TrOn_0000328",
+                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                "annotations": [
+                                    {
+                                        "language": "",
+                                        "name": "creation_date",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "2011-06-09T08:18:24Z"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "created_by",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "Daniela"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "label",
+                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
+                                        "value": "wing"
+                                    }
+                                ],
+                                "children": [],
+                                "parents": []
+                            }
+                        ],
+                        "parents": [
+                            {
+                                "shell": true,
+                                "name": "TrOn_0000006",
+                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                "annotations": [
+                                    {
+                                        "language": "",
+                                        "name": "created_by",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "juergen"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "creation_date",
+                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
+                                        "value": "2011-05-10T02:29:55Z"
+                                    },
+                                    {
+                                        "language": "",
+                                        "name": "label",
+                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
+                                        "value": "organism subdivision"
+                                    }
+                                ],
+                                "children": [],
+                                "parents": []
+                            }
+                        ]
+                    }*/
+            get_Cls(this).then(data => {
+                var data2 = data.data
+                this.fillWithTemplate(data2)
+            });
+
         }
 
 
@@ -130,6 +321,15 @@
             this.oc_name = data.entities[0].name;
             this.oc_namespace = data.entities[0].namespace;
             this.json = data.entities[0]
+        }
+        fillWithTemplate2(data) {
+            this.oc_children = data.children;
+            this.oc_parents = data.parents;
+            this.oc_shell = data.shell;
+            this.oc_annotations = data.annotations;
+            this.oc_name = data.name;
+            this.oc_namespace = data.namespace;
+            this.json = data
         }
 
     }
@@ -301,14 +501,12 @@
                                 var json = tmp.json();
                                 var object = json.data.object;
                                 var children = object.getChildren();
+                                var children2 = async () => {
+                                    await  object.getChildren();
+                                };
+                                var test2 = children2
                                 var test = object.oc_children
-                                //console.log(object)
-                                //load the children
-                                //hier liegt ein widerspruch vor, deswegen muss auch zweimal geladen werden
-                                //console.log(newobject.json)
-                                //console.log(newobject.json.shell
-                                //these are all children from the node
-                                if (children) {
+                                if (children2) {
                                     //console.log("children:")
                                     for (const p of children) {
                                         var children_cls = new Ontology_class(p); // set flag to fill object
@@ -325,6 +523,13 @@
                                 } else {
                                     console.log("no children to display!")
                                 }
+                                //console.log(object)
+                                //load the children
+                                //hier liegt ein widerspruch vor, deswegen muss auch zweimal geladen werden
+                                //console.log(newobject.json)
+                                //console.log(newobject.json.shell
+                                //these are all children from the node
+
                                 //  var onto_cls = new Ontology_class(tmp);
 
 
