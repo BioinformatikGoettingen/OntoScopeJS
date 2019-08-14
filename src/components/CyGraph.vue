@@ -21,7 +21,7 @@
     import cxtmenu from 'cytoscape-cxtmenu'
 
     //load the class given as argument
-    function get_Cls(Cls) {
+    async function get_Cls(Cls) {
         try {
           var url = "http://oba.sybig.de";
           var ontology = "tribolium";
@@ -29,11 +29,13 @@
           axios.defaults.headers = {
               'Accept': 'application/json'
           };
-            return axios ({
+            var response  = await axios ({
                 url: url + '/' + ontology + "/functions/basic/searchCls/" + searchString,
                 method: "get",
                 timeout: 8000
             })
+            console.log(response.data)
+            return response.data
 
         } catch (err) {
             console.log(err)
@@ -109,28 +111,34 @@
             return this.json.label;
         }
 
-        //here we now need to overwrite this.json data
-        fillCls() {
-            /*var response = async function () {
-                let newCls = await get_Cls(this).then(data => {
-                    var data2 = data.data
-                    this.fillWithTemplate(data2)})
-            }
-           let results = await Promise.all(get_Cls(this))
-           this.fillWithTemplate(results)
-            return results
-
-            get_Cls(this).then(data => {
-                var data2 = data.data
-                this.fillWithTemplate(data2)
-            })*/
+        fillCls(){
+            var data = get_Cls(this)
+            this.fillWithTemplate(data)
+        }
+        // //here we now need to overwrite this.json data
+        // fillCls() {
+        //     var response = async function () {
+        //         let newCls = await get_Cls(this).then(data => {
+        //             var data2 = data.data
+        //             this.fillWithTemplate(data2)})
+        //     }
+        //    let results = await Promise.all(get_Cls(this))
+        //    this.fillWithTemplate(results)
+        //     return results
+        //
+        //     get_Cls(this).then(data => {
+        //         var data2 = data.data
+        //         this.fillWithTemplate(data2)
+        //     })
             //console.log(get_Cls(this))
-           // get_Cls(this).then(data => {
+            // get_Cls(this).then(data => {
             //    var data2 = data.data
 
-                //this.fillWithTemplate(data2)
-            //})
-            /*var data2 =
+            //this.fillWithTemplate(data2)
+            // })
+            fillClsWithStaticData(){
+
+            var data2 =
                     {
                         "shell": false,
                         "name": "TrOn_0000007",
@@ -300,13 +308,15 @@
                                 "parents": []
                             }
                         ]
-                    }*/
-            get_Cls(this).then(data => {
-                var data2 = data.data
-                this.fillWithTemplate(data2)
-            });
-
+                    }
+                    return data2
         }
+        //     get_Cls(this).then(data => {
+        //         var data2 = data.data
+        //         this.fillWithTemplate(data2)
+        //     });
+        //
+        // }
 
 
         /*
