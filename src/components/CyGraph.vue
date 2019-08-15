@@ -23,33 +23,7 @@
 
     let connector = new GenericConnector() //TODO make it dependent on the ontology
 
-    //load the class given as argument
-    async function get_Cls(Cls) {
-        try {
-          var url = "http://oba.sybig.de";
-          var ontology = "tribolium";
-          var searchString = Cls.label;
-          axios.defaults.headers = {
-              'Accept': 'application/json'
-          };
-            var response  = await axios ({
-                url: url + '/' + ontology + "/functions/basic/searchCls/" + searchString,
-                method: "get",
-                timeout: 8000
-            })
-            console.log(response.data)
-            return response.data
 
-        } catch (err) {
-            console.log(err)
-        }
-        //return axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString);
-        /*return  axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
-           .then(function (response) {
-               return response
-           });*/
-
-    }
 
 
 
@@ -61,7 +35,7 @@
                 selector: "node",
                 style: {
                     "background-color": "#666",
-                    label: "data(id)"
+                    label: "data(label)"
                 }
             },
             {
@@ -115,7 +89,7 @@
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, object: onto_cls}}]);
             for (const p of onto_cls.json.parents) {
-                var parent_cls = new OntoCls(p); // set flag to fill object
+                var parent_cls = new OntoCls(p); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
                 cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
                     {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
@@ -209,7 +183,7 @@
                             select: function (tmp) {
                                 var json = tmp.json();
                                 var object = json.data.object;
-                                object.getChildren();
+                                object.children();
                                 console.log(object);
                                 //console.log(object.getChildren());
                             }
@@ -221,9 +195,9 @@
                             select: function (tmp) {
                                 var json = tmp.json();
                                 var object = json.data.object;
-                                var children = object.getChildren();
+                                var children = object.children;
                                 var children2 = async () => {
-                                    await  object.getChildren();
+                                    await  object.children;
                                 };
                                 var test2 = children2
                                 var test = object.oc_children
@@ -272,7 +246,7 @@
                                 var json = tmp.json();
                                 var data = json.data;
                                 var object = data.object;
-                                var children = object.getChildren();
+                                var children = object.children();
                                 var length = children.length
                                 var test = "12"
                             }
