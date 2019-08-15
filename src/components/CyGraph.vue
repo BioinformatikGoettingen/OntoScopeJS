@@ -15,11 +15,13 @@
 
 <script>
     import axios from 'axios'
-    import cytoscape from '@/components/Cytoscape'
-    //import config from '@/utils/dummy-config'
     import CyObj from '@/components/cy-object'
     import cxtmenu from 'cytoscape-cxtmenu'
     import OntoCls from './OntoCls'
+    import GenericConnector from "./GenericConnector";  //TODO move to GenericConnecotr
+
+
+    let connector = new GenericConnector() //TODO make it dependent on the ontology
 
     //load the class given as argument
     async function get_Cls(Cls) {
@@ -74,14 +76,15 @@
         ]
     };
 
-    function add_first(json_response, cy) {
+    function add_searched_cls_to_graph(json_response, cy) {
         //temporary function to add the first node, will be replaced by a selection list
         //console.log("add first node from search result")
-        if (json_response.status !== 200 || json_response.data.entities.length < 1) {
-            console.log("no entities found");
-            return;
-        }
-        var onto_cls = new OntoCls(json_response.data.entities[0]);
+        // if (json_response.status !== 200 || json_response.data.entities.length < 1) {
+        //     console.log("no entities found");
+        //     return;
+        // }
+        // var onto_cls = new OntoCls(json_response.data.entities[0]);
+        var onto_cls = json_response
         console.log(onto_cls);
         add_data(onto_cls, cy);
 
@@ -347,22 +350,11 @@
                 cy.endBatch();
                 cy.fit();
             },
-            search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
-                console.log(this.$refs);
-                axios.defaults.headers = {
-                    'Accept': 'application/json'
-                };
-                var cy = this.$cytoscape.instance;
-                axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
-                    .then(function (response) {
+            async search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
+                const searchedResult = await connector.search_for_class(searchString);
+                add_searched_cls_to_graph(searchedResult[0], this.$cytoscape.instance, false)
 
-                        add_first(response, cy, false);
-                    });
-            },
-            test2() {
-                console.log("test")
-            },
-
+            }
         }
 
 
