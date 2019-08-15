@@ -19,6 +19,7 @@
     //import config from '@/utils/dummy-config'
     import CyObj from '@/components/cy-object'
     import cxtmenu from 'cytoscape-cxtmenu'
+    import OntoCls from './OntoCls'
 
     //load the class given as argument
     async function get_Cls(Cls) {
@@ -49,300 +50,7 @@
     }
 
 
-    class Ontology_class {
 
-        constructor(json) {
-            this.json = json;
-            this.oc_children = json.children;
-            this.oc_annotations = json.annotations;
-            this.oc_name = json.name;
-            this.oc_namespace = json.namespace;
-            this.oc_parents = json.parents;
-            this.oc_shell = json.shell
-            //var shell = this.json.shell
-            //var children = this.json.children
-        }
-
-        get children() {
-
-            if (!this.json.shell && this._children.length == 0) {
-                return null;
-            }
-            if (this.json.shell) {
-                this.fillCls(this)
-            }
-            return this.json.children
-        }
-
-
-        get id() {
-            return this.json.name;
-        }
-
-        getChildren() {
-            if (!this.oc_shell && this.oc_children.length == 0) {
-                return null;
-            }
-            if (this.oc_shell) {
-                this.fillCls()
-                return this.oc_children
-              //  this.fillCls().then( data => { return this.oc_children}
-                //hier Promise.all mit getCls, fillCls, and fillWithTemplate
-            }else {
-                return this.oc_children
-            }
-        }
-
-        get label() {
-            // later on switch between name of the class or label annotation
-            // also switch language
-            //
-            for (var anno of this.json.annotations) {
-                if (anno.name === 'label') {
-                    //this.label = anno.value;
-                    return anno.value;
-                }
-            }
-            return this.json.name;
-        }
-
-
-        get name() {
-            return this.json.label;
-        }
-
-        fillCls(){
-            var data = get_Cls(this)
-            this.fillWithTemplate(data)
-        }
-        // //here we now need to overwrite this.json data
-        // fillCls() {
-        //     var response = async function () {
-        //         let newCls = await get_Cls(this).then(data => {
-        //             var data2 = data.data
-        //             this.fillWithTemplate(data2)})
-        //     }
-        //    let results = await Promise.all(get_Cls(this))
-        //    this.fillWithTemplate(results)
-        //     return results
-        //
-        //     get_Cls(this).then(data => {
-        //         var data2 = data.data
-        //         this.fillWithTemplate(data2)
-        //     })
-            //console.log(get_Cls(this))
-            // get_Cls(this).then(data => {
-            //    var data2 = data.data
-
-            //this.fillWithTemplate(data2)
-            // })
-            fillClsWithStaticData(){
-
-            var data2 =
-                    {
-                        "shell": false,
-                        "name": "TrOn_0000007",
-                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                        "annotations": [
-                            {
-                                "language": "",
-                                "name": "created_by",
-                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                "value": "juergen"
-                            },
-                            {
-                                "language": "",
-                                "name": "xref",
-                                "namespace": "http://www.geneontology.org/formats/oboInOwl#",
-                                "value": "FBbt:00007000"
-                            },
-                            {
-                                "language": "",
-                                "name": "label",
-                                "namespace": "http://www.w3.org/2000/01/rdf-schema#",
-                                "value": "appendage"
-                            },
-                            {
-                                "language": "",
-                                "name": "creation_date",
-                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                "value": "2011-05-10T02:30:33Z"
-                            }
-                        ],
-                        "children": [
-                            {
-                                "shell": true,
-                                "name": "TrOn_0000008",
-                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                "annotations": [
-                                    {
-                                        "language": "",
-                                        "name": "label",
-                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
-                                        "value": "leg"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "created_by",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "juergen"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "creation_date",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "2011-05-10T02:31:26Z"
-                                    }
-                                ],
-                                "children": [],
-                                "parents": []
-                            },
-                            {
-                                "shell": true,
-                                "name": "TrOn_0000696",
-                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                "annotations": [
-                                    {
-                                        "language": "",
-                                        "name": "created_by",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "Daniela"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "creation_date",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "2011-06-28T05:05:47Z"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "label",
-                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
-                                        "value": "gnathal_appendage"
-                                    }
-                                ],
-                                "children": [],
-                                "parents": []
-                            },
-                            {
-                                "shell": true,
-                                "name": "TrOn_0000697",
-                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                "annotations": [
-                                    {
-                                        "language": "",
-                                        "name": "created_by",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "Daniela"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "label",
-                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
-                                        "value": "procephalic_appendage"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "creation_date",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "2011-06-28T05:05:47Z"
-                                    }
-                                ],
-                                "children": [],
-                                "parents": []
-                            },
-                            {
-                                "shell": true,
-                                "name": "TrOn_0000328",
-                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                "annotations": [
-                                    {
-                                        "language": "",
-                                        "name": "creation_date",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "2011-06-09T08:18:24Z"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "created_by",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "Daniela"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "label",
-                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
-                                        "value": "wing"
-                                    }
-                                ],
-                                "children": [],
-                                "parents": []
-                            }
-                        ],
-                        "parents": [
-                            {
-                                "shell": true,
-                                "name": "TrOn_0000006",
-                                "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                "annotations": [
-                                    {
-                                        "language": "",
-                                        "name": "created_by",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "juergen"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "creation_date",
-                                        "namespace": "http://purl.org/obo/owlapi/tribolium.anatomy#",
-                                        "value": "2011-05-10T02:29:55Z"
-                                    },
-                                    {
-                                        "language": "",
-                                        "name": "label",
-                                        "namespace": "http://www.w3.org/2000/01/rdf-schema#",
-                                        "value": "organism subdivision"
-                                    }
-                                ],
-                                "children": [],
-                                "parents": []
-                            }
-                        ]
-                    }
-                    return data2
-        }
-        //     get_Cls(this).then(data => {
-        //         var data2 = data.data
-        //         this.fillWithTemplate(data2)
-        //     });
-        //
-        // }
-
-
-        /*
-        })*/
-
-
-        fillWithTemplate(data) {
-            this.oc_children = data.entities[0].children;
-            this.oc_parents = data.entities[0].parents;
-            this.oc_shell = data.entities[0].shell;
-            this.oc_annotations = data.entities[0].annotations;
-            this.oc_name = data.entities[0].name;
-            this.oc_namespace = data.entities[0].namespace;
-            this.json = data.entities[0]
-        }
-        fillWithTemplate2(data) {
-            this.oc_children = data.children;
-            this.oc_parents = data.parents;
-            this.oc_shell = data.shell;
-            this.oc_annotations = data.annotations;
-            this.oc_name = data.name;
-            this.oc_namespace = data.namespace;
-            this.json = data
-        }
-
-    }
 
     /* eslint-disable */
     const config = {
@@ -373,7 +81,7 @@
             console.log("no entities found");
             return;
         }
-        var onto_cls = new Ontology_class(json_response.data.entities[0]);
+        var onto_cls = new OntoCls(json_response.data.entities[0]);
         console.log(onto_cls);
         add_data(onto_cls, cy);
 
@@ -389,7 +97,7 @@
                 data: {id: onto_cls.id, label: onto_cls.label, children: onto_cls.json.children, data: onto_cls}
             }]);
             for (const p of onto_cls.json.parents) {
-                var parent_cls = new Ontology_class(p); // set flag to fill object
+                var parent_cls = new OntoCls(p); // set flag to fill object
                 //var searchString = parent_cls.label
                 cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, data: parent_cls}},
                     {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
@@ -404,7 +112,7 @@
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, object: onto_cls}}]);
             for (const p of onto_cls.json.parents) {
-                var parent_cls = new Ontology_class(p); // set flag to fill object
+                var parent_cls = new OntoCls(p); // set flag to fill object
                 //var searchString = parent_cls.label
                 cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
                     {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
@@ -419,7 +127,7 @@
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, creation: onto_cls.created_by}}]);
             for (const p of onto_cls.json.children) {
-                var children_cls = new Ontology_class(p); // set flag to fill object
+                var children_cls = new OntoCls(p); // set flag to fill object
                 //load data
                 // Problem: kein zugriff auf die daten
                 //  var children_cls_data = load_node(children_cls.label)
@@ -519,7 +227,7 @@
                                 if (children2) {
                                     //console.log("children:")
                                     for (const p of children) {
-                                        var children_cls = new Ontology_class(p); // set flag to fill object
+                                        var children_cls = new OntoCls(p); // set flag to fill object
                                         cy.add([{
                                             group: 'nodes',
                                             data: {id: children_cls.id, label: children_cls.label, object: children_cls}
@@ -540,7 +248,7 @@
                                 //console.log(newobject.json.shell
                                 //these are all children from the node
 
-                                //  var onto_cls = new Ontology_class(tmp);
+                                //  var onto_cls = new OntoCls(tmp);
 
 
                             }
