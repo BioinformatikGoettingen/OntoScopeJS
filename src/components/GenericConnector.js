@@ -16,7 +16,6 @@ export default class GenericConnector {
             let cls = this.createNewOntoCs(jsonCls)
             result_cls.push(cls)
         }
-        console.log("returning search results " + result_cls.length)
         return result_cls
     }
 
@@ -24,12 +23,13 @@ export default class GenericConnector {
         try {
             var url = "http://oba.sybig.de";
             var ontology = "tribolium";
-            var searchString = Cls.label;
+            var cls_id = Cls.id;
+            console.log("fetching " + cls_id)
             axios.defaults.headers = {
                 'Accept': 'application/json'
             };
             var response = await axios({
-                url: url + '/' + ontology + "/functions/basic/searchCls/" + searchString,
+                url: url + '/' + ontology + "/cls/" + cls_id, // add also (encoded) NS
                 method: "get",
                 timeout: 8000
             })

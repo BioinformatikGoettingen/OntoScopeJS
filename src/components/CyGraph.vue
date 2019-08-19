@@ -73,8 +73,8 @@
                 group: 'nodes',
                 data: {id: onto_cls.id, label: onto_cls.label, children: onto_cls.json.children, data: onto_cls}
             }]);
-            for (const p of onto_cls.json.parents) {
-                var parent_cls = new OntoCls(p); // set flag to fill object
+            for (const parent of onto_cls.parents) {
+                //var parent_cls = new OntoCls(p); // set flag to fill object
                 //var searchString = parent_cls.label
                 cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, data: parent_cls}},
                     {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
@@ -85,11 +85,13 @@
         })
     }
 
-    function add_data(onto_cls, cyInst) {
+    function add_data(onto_cls, cyInst) { // what is the diffence to the function above???
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, object: onto_cls}}]);
-            for (const p of onto_cls.json.parents) {
-                var parent_cls = new OntoCls(p); // TODO get parent should return OntoClass objects
+            console.log("adding parents for " + onto_cls.id)
+            for (const parent_cls of onto_cls.parents) {
+                console.log("parent " + parent_cls)
+                // var parent_cls = new OntoCls(p); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
                 cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
                     {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
@@ -103,8 +105,8 @@
     function add_node_with_children(onto_cls, cyInst) {
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, creation: onto_cls.created_by}}]);
-            for (const p of onto_cls.json.children) {
-                var children_cls = new OntoCls(p); // set flag to fill object
+            for (const children_cls of onto_cls.json.children) {
+                //var children_cls = new OntoCls(p); // set flag to fill object
                 //load data
                 // Problem: kein zugriff auf die daten
                 //  var children_cls_data = load_node(children_cls.label)
