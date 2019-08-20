@@ -197,9 +197,23 @@
                             select: function (tmp) {
                                 var json = tmp.json();
                                 var object = json.data.object;
-                                var children = object.children;
+                               console.log(object.children)
+                                    for (const p of children) {
+                                        var children_cls = new OntoCls(p); // set flag to fill object
+                                        cy.add([{
+                                            group: 'nodes',
+                                            data: {id: children_cls.id, label: children_cls.label, object: children_cls}
+                                        },
+                                            {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                    }
+                                    ////http://js.cytoscape.org/#collection/layout
+                                    cy.layout({
+                                        name: 'cose'
+                                    }).run()
                                 var children2 = async () => {
+                                    //maybe inside a async function, creating the nodes
                                     await  object.children;
+
                                 };
                                 var test2 = children2
                                 var test = object.oc_children
@@ -238,19 +252,41 @@
                                 var json = tmp.json();
                                 var data = json.data;
                                 var object = data.object;
-                                console.log(object)
+                                var children = object.children.then( function(result) {
+                                    console.log(result)
+                                })
                             }
                         },
 
                         {
-                            content: 'get children length',
+                            content: 'get children now',
+                            fillColor: 'pink',
                             select: function (tmp) {
                                 var json = tmp.json();
-                                var data = json.data;
-                                var object = data.object;
-                                var children = object.children();
-                                var length = children.length
-                                var test = "12"
+                                var object = json.data.object;
+                                function getthesechildren(object) {
+                                    var children = object.children
+                                    if(children.length == 0 ){
+                                        console.log("children")
+                                        console.log(object.children)
+                                    }
+                                    //addtograph(await object.children)
+                                }
+                                function addtograph(children) {
+                                    for (const p of children) {
+                                        var children_cls = new OntoCls(p); // set flag to fill object
+                                        cy.add([{
+                                            group: 'nodes',
+                                            data: {id: children_cls.id, label: children_cls.label, object: children_cls}
+                                        },
+                                            {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                    }
+                                    ////http://js.cytoscape.org/#collection/layout
+                                    cy.layout({
+                                        name: 'cose'
+                                    }).run();
+                                }
+                                getthesechildren(object);
                             }
                         }
                     ]

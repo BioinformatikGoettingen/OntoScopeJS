@@ -28,13 +28,14 @@ export default class GenericConnector {
             axios.defaults.headers = {
                 'Accept': 'application/json'
             };
-            var response = await axios({
+            let response = await axios({
                 url: url + '/' + ontology + "/cls/" + cls_id, // add also (encoded) NS
                 method: "get",
                 timeout: 8000
-            })
-            console.log(response.data)
-            return response.data
+            });
+
+            console.log(await response)
+            return await response
 
         } catch (err) {
             console.log(err)

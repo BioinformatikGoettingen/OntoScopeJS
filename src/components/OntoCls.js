@@ -24,14 +24,30 @@ connector
          if (!this.oc_shell && this.oc_children.length == 0) {
              return null;
          }
-         if (this.oc_shell) {
-             this.fillCls()
-         }
-             //  this.fillCls().then( data => { return this.oc_children}
-             //hier Promise.all mit getCls, fillCls, and fillWithTemplate
+          if (this.oc_shell) {
+              console.log("hier getchildren")
+              //console.log(this.fillCls())
+              var p1 = new Promise(function (resolve, reject) {
+                  setTimeout(() => resolve("done"), 3000);
+              })
+              //return this.fillCls();
+              const timeOut = (t) => {
+                  return new Promise((resolve, reject) => {
+                      setTimeout(() => {
+                          resolve(`Completed in ${t}`)
+                      }, t)
+                  })
+              }
+              return Promise.all([this.fillCls()])
+                  //.then(result => console.log(result))
+              // console.log(this.oc_children.length + " children")
 
-         console.log(this.oc_children.length + " children")
-         return this.oc_children
+              //return children;
+              // return this.oc_children
+          }
+          //  this.fillCls().then( data => { return this.oc_children}
+             //hier Promise.all mit getCls, fillCls, and fillWithTemplate
+            // the getter cant return a promise, which unfullfilled
 
      }
 
@@ -69,11 +85,14 @@ connector
 
      async fillCls(){
         console.log("filling class " + this.id)
-        const data = this.connector.get_cls_data(this)
-        console.log("fetched data, now fill " )
+        const promise = await this.connector.get_cls_data(this)
+        var data =  promise.data;
+        console.log("fetched data, now fill with" )
+         console.log(data)
         // console.log(data)
         //await this.fillWithTemplate(data)
-        await data.then(this.fillWithTemplate(data))
+        this.fillWithTemplate(data)
+         return promise
          
     }
 
