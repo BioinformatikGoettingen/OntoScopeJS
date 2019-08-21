@@ -256,7 +256,7 @@
                                     var children = await object.children;
                                     console.log(children);
                                     for (const p of children) {
-                                        var children_cls = new OntoCls(p); // set flag to fill object
+                                        var children_cls = p; // set flag to fill object
                                         cy.add([{
                                           group: 'nodes',
                                             data: {id: children_cls.id, label: children_cls.label, object: children_cls}
