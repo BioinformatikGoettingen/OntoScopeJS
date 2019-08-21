@@ -161,6 +161,7 @@
 
             },
             afterCreated: function (cy) {
+                let menu;
                 console.log(cy);
                 let menu2 = this.$refs.menu;
                 //cy.on("dragfree", "node", evt => this.setCyElements(cy));
@@ -176,7 +177,7 @@
                     console.log(node.data.object)
                 });
                 //if nodes need different context menue, we need to create a cy.cxtmenu for each type of node
-                let menu = cy.cxtmenu({
+                menu = cy.cxtmenu({
                     selector: 'node',
                     commands: [
                         {
@@ -197,22 +198,22 @@
                             select: function (tmp) {
                                 var json = tmp.json();
                                 var object = json.data.object;
-                               console.log(object.children)
-                                    for (const p of children) {
-                                        var children_cls = new OntoCls(p); // set flag to fill object
-                                        cy.add([{
-                                            group: 'nodes',
-                                            data: {id: children_cls.id, label: children_cls.label, object: children_cls}
-                                        },
-                                            {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
-                                    }
-                                    ////http://js.cytoscape.org/#collection/layout
-                                    cy.layout({
-                                        name: 'cose'
-                                    }).run()
+                                console.log(object.children)
+                                for (const p of children) {
+                                    var children_cls = new OntoCls(p); // set flag to fill object
+                                    cy.add([{
+                                        group: 'nodes',
+                                        data: {id: children_cls.id, label: children_cls.label, object: children_cls}
+                                    },
+                                        {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                }
+                                ////http://js.cytoscape.org/#collection/layout
+                                cy.layout({
+                                    name: 'cose'
+                                }).run()
                                 var children2 = async () => {
                                     //maybe inside a async function, creating the nodes
-                                    await  object.children;
+                                    await object.children;
 
                                 };
                                 var test2 = children2
@@ -247,46 +248,38 @@
                             }
                         },
                         {
-                            content: 'show object',
-                            select: function (tmp) {
-                                var json = tmp.json();
-                                var data = json.data;
-                                var object = data.object;
-                                var children = object.children.then( function(result) {
-                                    console.log(result)
-                                })
+                            content: 'show children',
+                            select: async function (tmp) {
+                                    var json = tmp.json();
+                                    var data = json.data;
+                                    var object = data.object;
+                                    var children = await object.children;
+                                    console.log(children);
+                                    for (const p of children) {
+                                        var children_cls = new OntoCls(p); // set flag to fill object
+                                        cy.add([{
+                                          group: 'nodes',
+                                            data: {id: children_cls.id, label: children_cls.label, object: children_cls}
+                                        },
+                                            {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                    }
+                                 ////http://js.cytoscape.org/#collection/layout
+                                    cy.layout({
+                                        name: 'cose'
+                                    }).run()
                             }
                         },
 
                         {
                             content: 'get children now',
                             fillColor: 'pink',
-                            select: function (tmp) {
+                            select: async function (tmp) {
                                 var json = tmp.json();
-                                var object = json.data.object;
-                                function getthesechildren(object) {
-                                    var children = object.children
-                                    if(children.length == 0 ){
-                                        console.log("children")
-                                        console.log(object.children)
-                                    }
+                                var data = json.data;
+                                var object = data.object;
+                                var children = await object.children;
+                                console.log(children);
                                     //addtograph(await object.children)
-                                }
-                                function addtograph(children) {
-                                    for (const p of children) {
-                                        var children_cls = new OntoCls(p); // set flag to fill object
-                                        cy.add([{
-                                            group: 'nodes',
-                                            data: {id: children_cls.id, label: children_cls.label, object: children_cls}
-                                        },
-                                            {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
-                                    }
-                                    ////http://js.cytoscape.org/#collection/layout
-                                    cy.layout({
-                                        name: 'cose'
-                                    }).run();
-                                }
-                                getthesechildren(object);
                             }
                         }
                     ]

@@ -34,7 +34,7 @@ export default class GenericConnector {
                 timeout: 8000
             });
 
-            console.log(await response)
+            //console.log(await response)
             return await response
 
         } catch (err) {
