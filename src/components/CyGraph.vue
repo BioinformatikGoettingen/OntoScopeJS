@@ -59,7 +59,7 @@
         // }
         // var onto_cls = new OntoCls(json_response.data.entities[0]);
         var onto_cls = json_response
-        console.log(onto_cls);
+        console.log(onto_cls)
         add_data(onto_cls, cy);
 
 
@@ -254,32 +254,38 @@
                                     var data = json.data;
                                     var object = data.object;
                                     var children = await object.children;
-                                    console.log(children);
-                                    for (const p of children) {
-                                        var children_cls = p; // set flag to fill object
-                                        cy.add([{
-                                          group: 'nodes',
-                                            data: {id: children_cls.id, label: children_cls.label, object: children_cls}
-                                        },
-                                            {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                    console.log(children)
+                                    if(children.length > 0) {
+                                        for (const children_cls of children) {
+                                            console.log(children_cls.id )
+                                            cy.add([{
+                                                group: 'nodes',
+                                                data: {
+                                                    id: children_cls.id,
+                                                    label: children_cls.label,
+                                                    object: children_cls
+                                                }
+                                            },
+                                                {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                        }
+                                        ////http://js.cytoscape.org/#collection/layout
+                                        cy.layout({
+                                            name: 'cose'
+                                        }).run()
+                                    }else {
+                                        alert("no children to display")
                                     }
-                                 ////http://js.cytoscape.org/#collection/layout
-                                    cy.layout({
-                                        name: 'cose'
-                                    }).run()
                             }
                         },
 
                         {
-                            content: 'get children now',
+                            content: 'show object',
                             fillColor: 'pink',
                             select: async function (tmp) {
                                 var json = tmp.json();
                                 var data = json.data;
                                 var object = data.object;
-                                var children = await object.children;
-                                console.log(children);
-                                    //addtograph(await object.children)
+                                console.log(object);
                             }
                         }
                     ]

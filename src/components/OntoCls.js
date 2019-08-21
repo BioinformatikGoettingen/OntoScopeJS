@@ -7,9 +7,10 @@ connector
         this.oc_annotations = json.annotations;
         this.oc_name = json.name;
         this.oc_namespace = json.namespace;
-        this.oc_shell = json.shell
+        this.oc_shell = json.shell;
         console.log("constructor")
         console.log(this)
+        console.log(json.shell)
 
         //var shell = this.json.shell
         //var children = this.json.children
@@ -17,7 +18,7 @@ connector
     }
 
     get id() {
-        return this.json.name;
+        return this.oc_name;
     }
 
 
