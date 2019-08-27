@@ -12,8 +12,10 @@ export default class GenericConnector {
         const response = await axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
         //TODO if their is no result, repeat the search once with wildcard
         let result_cls = []
+        var data = response.data.entities[0]
         for (let jsonCls of response.data.entities) {
             let cls = this.createNewOntoCs(jsonCls)
+            cls.fillWithTemplate(data)
             result_cls.push(cls)
         }
         return result_cls

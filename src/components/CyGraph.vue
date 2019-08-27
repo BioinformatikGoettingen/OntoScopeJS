@@ -57,9 +57,11 @@
         //     console.log("no entities found");
         //     return;
         // }
-        // var onto_cls = new OntoCls(json_response.data.entities[0]);
+        var onto_cls2 = new OntoCls(json_response.json);
         var onto_cls = json_response
+        console.log("hier")
         console.log(onto_cls)
+        console.log(onto_cls2)
         add_data(onto_cls, cy);
 
 
@@ -87,7 +89,11 @@
 
     function add_data(onto_cls, cyInst) { // what is the diffence to the function above???
         cyInst.then(cy => {
-            cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, object: onto_cls}}]);
+            cy.add([{group: 'nodes', data: {
+                    id: onto_cls.id,
+                    label: onto_cls.label,
+                    object: onto_cls
+            }}]);
             console.log("adding parents for " + onto_cls.id)
             for (const parent_cls of onto_cls.parents) {
                 console.log("parent " + parent_cls)
@@ -254,9 +260,10 @@
                                     var data = json.data;
                                     var object = data.object;
                                     var children = await object.children;
-                                    console.log(children)
+                                console.log("children")
+                                console.log(children)
                                     if(children.length > 0) {
-                                        for (const children_cls of children) {
+                                        for (var children_cls of children) {
                                             console.log(children_cls.id )
                                             cy.add([{
                                                 group: 'nodes',
@@ -362,7 +369,7 @@
                 cy.fit();
             },
             async search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
-                const searchedResult = await connector.search_for_class(searchString);
+                var searchedResult = await connector.search_for_class(searchString);
                 add_searched_cls_to_graph(searchedResult[0], this.$cytoscape.instance, false)
 
             }
