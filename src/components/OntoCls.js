@@ -7,6 +7,7 @@ connector
         this.oc_annotations = json.annotations;
         this.oc_name = json.name;
         this.oc_namespace = json.namespace;
+        //this.oc_parents = json.parents;
         this.oc_shell = json.shell;
         console.log("constructor")
         console.log(this)
@@ -50,6 +51,20 @@ connector
         }
         return this.oc_parents
     }
+   /*get parents() {
+       console.log("get parents for " + this.label)
+       if (!this.oc_shell && this.oc_parents.length == 0) {
+           return null;
+       }
+       if (this.oc_shell) {
+           console.log("hier getparent")
+           return this.fillCls().then(data => {
+               return this.oc_parents
+           });
+       }else {
+           return this.oc_parents
+       }
+   }*/
     
     get label() {
         // later on switch between name of the class or label annotation
@@ -97,6 +112,7 @@ connector
         this.oc_annotations = json_cls.annotations;
         this.oc_name = json_cls.name;
         this.oc_namespace = json_cls.namespace;
+       // this.oc_parents = json_cls.parents;
         this.json = json_cls
     }
 

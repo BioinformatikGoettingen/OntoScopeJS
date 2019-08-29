@@ -1,15 +1,24 @@
 <template>
-    <div id="holder">
-        <cytoscape
+    <div>
+        <div id="holder">
+         <cytoscape
                 :key="'cyKey()'"
                 :config="config"
                 :preConfig="preConfig"
                 :afterCreated="afterCreated"
                 :debug="true"
-        />
-        <input id="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
-        <button id="searchClassButton" v-on:click="search_for_class(searchTerm)" ref="mybutton">Search</button>
+         />
+         <input id="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
+         <button id="searchClassButton" v-on:click="search_for_class(searchTerm)" ref="mybutton">Search</button>
+        </div>
+        <div id="myModal" class="modal">
 
+            <!-- Modal content -->
+            <div id ="modal-content" class="modal-content">
+                <h2> Expand the graph</h2>
+                <span class="close">&times;</span>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -59,9 +68,6 @@
         // }
         var onto_cls2 = new OntoCls(json_response.json);
         var onto_cls = json_response
-        console.log("hier")
-        console.log(onto_cls)
-        console.log(onto_cls2)
         add_data(onto_cls, cy);
 
 
@@ -187,143 +193,78 @@
                     selector: 'node',
                     commands: [
                         {
-                            content: "load object",
+                            content: "expand",
                             fillColor: 'green',
-                            select: function (tmp) {
-                                var json = tmp.json();
-                                var object = json.data.object;
-                                object.children();
-                                console.log(object);
-                                //console.log(object.getChildren());
-                            }
-                        },
-                        {
-                            content: 'get children',
-                            fillColor: "blue",
-                            //load children from node, cia the children getter
-                            select: function (tmp) {
-                                var json = tmp.json();
-                                var object = json.data.object;
-                                console.log(object.children)
-                                for (const p of children) {
-                                    var children_cls = new OntoCls(p); // set flag to fill object
-                                    cy.add([{
-                                        group: 'nodes',
-                                        data: {id: children_cls.id, label: children_cls.label, object: children_cls}
-                                    },
-                                        {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
-                                }
-                                ////http://js.cytoscape.org/#collection/layout
-                                cy.layout({
-                                    name: 'cose'
-                                }).run()
-                                var children2 = async () => {
-                                    //maybe inside a async function, creating the nodes
-                                    await object.children;
-
-                                };
-                                var test2 = children2
-                                var test = object.oc_children
-                                if (children2) {
-                                    //console.log("children:")
-                                    for (const p of children) {
-                                        var children_cls = new OntoCls(p); // set flag to fill object
-                                        cy.add([{
-                                            group: 'nodes',
-                                            data: {id: children_cls.id, label: children_cls.label, object: children_cls}
-                                        },
-                                            {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
-                                    }
-                                    ////http://js.cytoscape.org/#collection/layout
-                                    cy.layout({
-                                        name: 'cose'
-                                    }).run();
-                                } else {
-                                    console.log("no children to display!")
-                                }
-                                //console.log(object)
-                                //load the children
-                                //hier liegt ein widerspruch vor, deswegen muss auch zweimal geladen werden
-                                //console.log(newobject.json)
-                                //console.log(newobject.json.shell
-                                //these are all children from the node
-
-                                //  var onto_cls = new OntoCls(tmp);
-
-
-                            }
-                        },
-                        {
-                            content: 'show children',
                             select: async function (tmp) {
-                                    var json = tmp.json();
-                                    var data = json.data;
-                                    var object = data.object;
-                                    var children = await object.children;
-                                console.log("children")
-                                console.log(children)
-                                    if(children.length > 0) {
-                                        for (var children_cls of children) {
-                                            console.log(children_cls.id )
-                                            cy.add([{
-                                                group: 'nodes',
-                                                data: {
-                                                    id: children_cls.id,
-                                                    label: children_cls.label,
-                                                    object: children_cls
-                                                }
-                                            },
-                                                {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
-                                        }
-                                        ////http://js.cytoscape.org/#collection/layout
-                                        cy.layout({
-                                            name: 'cose'
-                                        }).run()
-                                    }else {
-                                        alert("no children to display")
+                                var json = tmp.json();
+                                var data = json.data;
+                                var object = data.object;
+                                //https://vuejs.org/v2/examples/modal.html
+                                //https://stackoverflow.com/questions/35785997/custom-popup-window
+                                //create modal
+
+                                var modal = document.getElementById("myModal");
+                                modal.style.display = "block";
+                                var span = document.getElementsByClassName("close")[0];
+
+                                var children = await object.children;
+                                if(children.length > 0) {
+                                    var string = "load children (" + children.length + ")";
+                                    var node = document.createElement("div");
+                                    var textnode = document.createTextNode(string);
+                                    node.id = "children"
+                                    node.appendChild(textnode);
+                                    document.getElementById("modal-content").appendChild(node);
+                                }
+                               document.getElementById("children").onclick = function() {
+                                   for (var children_cls of children) {
+                                       console.log(children_cls.id )
+                                       cy.add([{
+                                           group: 'nodes',
+                                           data: {
+                                               id: children_cls.id,
+                                               label: children_cls.label,
+                                               object: children_cls
+                                           }
+                                       },
+                                           {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                   }
+                                   cy.layout({
+                                       name: 'cose'
+                                   }).run()
+                                   modal.style.display = "none";
+                                   node.parentNode.removeChild(node);
+
+                               }
+                                span.onclick = function() {
+                                    modal.style.display = "none";
+                                    node.parentNode.removeChild(node)
+                                }
+                                window.onclick = function(event) {
+                                    if (event.target == modal) {
+                                        modal.style.display = "none";
+                                        node.parentNode.removeChild(node)
+
                                     }
+                                }
+
                             }
                         },
 
                         {
-                            content: 'show object',
+                            content: 'get parent',
                             fillColor: 'pink',
                             select: async function (tmp) {
                                 var json = tmp.json();
                                 var data = json.data;
                                 var object = data.object;
-                                console.log(object);
+                                var parent = await object.parents
+                                console.log(parent);
                             }
                         }
                     ]
                 });
 
-                //cy.cxtmenu({selector: 'core',
-                //  commands: [
-                //  {
-                //    content: 'bg1',
-                //  select () {
-                //    console.log('bg1')
-                //}
-                //},
-                //  {
-                //    content: 'bg2',
-                //  select () {
-                //    console.log('bg2')
-                //}
-                //}
-                //]
-                //})
-                //cy.cxtmenu({selector: 'edge',
-                //  commands: [
-                //  {
-                //    content: 'edgemenue',
-                //  select () {
-                //    console.log('bg1')
-                //}
-                //}
-                //]
-                //})
                 this.setCyElements(cy);
                 // the default values of each option are outlined below:
 
@@ -387,7 +328,52 @@
         height: 600px;
         border: 1px red solid;
     }
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
 
+    /* Modal Content/Box */
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    #children {
+        border-style: solid;
+        border-width: 2px;
+        boder-color: #d3d3d3;
+        width: 80%;
+    }
+    #children:hover {
+        background-color: #d3d3d3;
+        cursor: pointer;
+    }
     /*#app {*/
     /*font-family: "Avenir", Helvetica, Arial, sans-serif;*/
     /*-webkit-font-smoothing: antialiased;*/
