@@ -203,18 +203,20 @@
                                 //https://stackoverflow.com/questions/35785997/custom-popup-window
                                 //create modal
 
-                                var modal = document.getElementById("myModal");
-                                modal.style.display = "block";
-                                var span = document.getElementsByClassName("close")[0];
 
                                 var children = await object.children;
                                 if(children.length > 0) {
+                                  var modal = document.getElementById("myModal");
+                                  modal.style.display = "block";
+                                  var span = document.getElementsByClassName("close")[0];
                                     var string = "load children (" + children.length + ")";
                                     var node = document.createElement("div");
                                     var textnode = document.createTextNode(string);
                                     node.id = "children"
                                     node.appendChild(textnode);
                                     document.getElementById("modal-content").appendChild(node);
+                                }else {
+                                  alert("no children to display")
                                 }
                                document.getElementById("children").onclick = function() {
                                    for (var children_cls of children) {
@@ -310,7 +312,45 @@
                 cy.fit();
             },
             async search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
-                var searchedResult = await connector.search_for_class(searchString);
+                var searchedResult = await connector.first_search(searchString);
+                var modal = document.getElementById("myModal");
+              //  modal.style.display = "block";
+                var span = document.getElementsByClassName("close")[0];
+                console.log(searchedResult)
+                /*for(var i = 0; i< searchedResult.length; i++){
+                  var string = searchedResult[i].json.annotations;
+                  var found = string.find(function(element) {
+                    return name == "label";
+                  });
+                  console.log(found);
+                  var node = document.createElement("div");
+                  var textnode = document.createTextNode(string);
+                   node.classList.add("selection");
+                  node.appendChild(textnode);
+                  document.getElementById("modal-content").appendChild(node);
+                }*/
+
+                span.onclick = function() {
+                    modal.style.display = "none";
+                    var elements = document.getElementsByClassName("selection");
+                        while(elements.length > 0){
+                            elements[0].parentNode.removeChild(elements[0]);
+                        }
+                }
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                        var elements = document.getElementsByClassName("selection");
+                            while(elements.length > 0){
+                                elements[0].parentNode.removeChild(elements[0]);
+                            }
+                    }
+                }
+                add_data(searchedResult[0], this.$cytoscape.instance, false)
+
+            },
+            async search_for_class_test(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
+                var searchedResult = await connector.first_search(searchString);
                 add_searched_cls_to_graph(searchedResult[0], this.$cytoscape.instance, false)
 
             }
