@@ -314,21 +314,35 @@
             async search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
                 var searchedResult = await connector.first_search(searchString);
                 var modal = document.getElementById("myModal");
-              //  modal.style.display = "block";
+               modal.style.display = "block";
                 var span = document.getElementsByClassName("close")[0];
                 console.log(searchedResult)
-                /*for(var i = 0; i< searchedResult.length; i++){
-                  var string = searchedResult[i].json.annotations;
-                  var found = string.find(function(element) {
-                    return name == "label";
-                  });
-                  console.log(found);
+                for(var i = 0; i< searchedResult.length; i++){
+                  var string = searchedResult[i].label;
                   var node = document.createElement("div");
                   var textnode = document.createTextNode(string);
                    node.classList.add("selection");
+                   node.id = searchedResult[i].id
                   node.appendChild(textnode);
                   document.getElementById("modal-content").appendChild(node);
-                }*/
+                }
+                var cytoscape = this.$cytoscape.instance;
+                var elements = document.querySelectorAll(".selection");
+                for (var i = 0; i < elements.length; i++) {
+                    elements[i].onclick = function() {
+                      var id = event.srcElement.id
+                      var cls = searchedResult.find(function(element) {
+                        return element.oc_name == id
+                      })
+                      add_data(cls, cytoscape, false)
+                      modal.style.display = "none";
+                      var elements = document.getElementsByClassName("selection");
+                          while(elements.length > 0){
+                              elements[0].parentNode.removeChild(elements[0]);
+                          }
+                    }
+                }
+
 
                 span.onclick = function() {
                     modal.style.display = "none";
@@ -346,7 +360,7 @@
                             }
                     }
                 }
-                add_data(searchedResult[0], this.$cytoscape.instance, false)
+
 
             },
             async search_for_class_test(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
@@ -411,6 +425,16 @@
         width: 80%;
     }
     #children:hover {
+        background-color: #d3d3d3;
+        cursor: pointer;
+    }
+    .selection {
+        border-style: solid;
+        border-width: 2px;
+        boder-color: #d3d3d3;
+        width: 80%;
+    }
+    .selection:hover {
         background-color: #d3d3d3;
         cursor: pointer;
     }
