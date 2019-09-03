@@ -7,7 +7,7 @@ connector
         this.oc_annotations = json.annotations;
         this.oc_name = json.name;
         this.oc_namespace = json.namespace;
-        //this.oc_parents = json.parents;
+        this.oc_parents = json.parents;
         this.oc_shell = json.shell;
         console.log("constructor")
         console.log(this)
@@ -65,7 +65,7 @@ connector
            return this.oc_parents
        }
    }*/
-    
+
     get label() {
         // later on switch between name of the class or label annotation
         // also switch language
@@ -98,11 +98,14 @@ connector
          console.log(this)
 
          return promise
-         
+
     }
 
 
     fillWithTemplate(data) {
+      console.log("fillWithTemplate")
+      console.log(data)
+      console.log(this)
         const json_cls = data
         this.oc_children = []
         for (let c of json_cls.children){
@@ -114,6 +117,7 @@ connector
         this.oc_namespace = json_cls.namespace;
        // this.oc_parents = json_cls.parents;
         this.json = json_cls
+        console.log(this)
     }
 
 

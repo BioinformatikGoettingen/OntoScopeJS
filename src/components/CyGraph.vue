@@ -101,9 +101,12 @@
                     object: onto_cls
             }}]);
             console.log("adding parents for " + onto_cls.id)
+            console.log(onto_cls)
+            console.log(onto_cls.parents)
             for (const parent_cls of onto_cls.parents) {
-                console.log("parent " + parent_cls)
-                // var parent_cls = new OntoCls(p); // TODO get parent should return OntoClass objects
+              console.log("test")
+              console.log(parent_cls)
+                var parent_cls = new OntoCls(parent_cls); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
                 cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
                     {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
@@ -251,6 +254,14 @@
                                 }
 
                             }
+                        },
+                        {
+                          content: 'delete node',
+                          fillColor: 'red',
+                          select: function (tmp) {
+                            tmp.remove()
+                              //cy.remove(tmp.id)
+                          }
                         },
 
                         {
