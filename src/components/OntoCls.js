@@ -38,7 +38,22 @@ connector
           }
      }
 
-    get parents(){
+     get parents() {
+          console.log("get parents for " + this.label)
+          if (!this.oc_shell && this.oc_parents.length == 0) {
+              return null;
+          }
+           if (this.oc_shell) {
+               console.log("hier getparents")
+               return this.fillCls().then(data => {
+                   return this.oc_parents
+               });
+           }else {
+               return this.oc_parents
+           }
+      }
+
+    /*get parents(){
         console.log("get parents " + this.oc_parents + "  _ " + this.json.parents)
         console.log(this.json.parents)
         if (this.oc_parents === undefined && this.json.parents.length > 0){
@@ -50,21 +65,8 @@ connector
             }
         }
         return this.oc_parents
-    }
-   /*get parents() {
-       console.log("get parents for " + this.label)
-       if (!this.oc_shell && this.oc_parents.length == 0) {
-           return null;
-       }
-       if (this.oc_shell) {
-           console.log("hier getparent")
-           return this.fillCls().then(data => {
-               return this.oc_parents
-           });
-       }else {
-           return this.oc_parents
-       }
-   }*/
+    }*/
+
 
     get label() {
         // later on switch between name of the class or label annotation
@@ -115,6 +117,10 @@ connector
         this.oc_annotations = json_cls.annotations;
         this.oc_name = json_cls.name;
         this.oc_namespace = json_cls.namespace;
+        this.oc_parents = []
+        for (let c of json_cls.parents){
+            this.oc_parents.push(this.connector.createNewOntoCs(c))
+        }
        // this.oc_parents = json_cls.parents;
         this.json = json_cls
         console.log(this)

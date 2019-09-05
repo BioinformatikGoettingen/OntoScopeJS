@@ -93,7 +93,7 @@
         })
     }
 
-    function add_data(onto_cls, cyInst) { // what is the diffence to the function above???
+    async function add_data(onto_cls, cyInst) { // what is the diffence to the function above???
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {
                     id: onto_cls.id,
@@ -102,11 +102,12 @@
             }}]);
             console.log("adding parents for " + onto_cls.id)
             console.log(onto_cls)
-            console.log(onto_cls.parents)
+
             for (const parent_cls of onto_cls.parents) {
               console.log("test")
               console.log(parent_cls)
-                var parent_cls = new OntoCls(parent_cls); // TODO get parent should return OntoClass objects
+              //var parent_cls =  connector.createNewOntoCs(parent_cls)
+                //var parent_cls = new OntoCls(parent_cls); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
                 cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
                     {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
@@ -206,9 +207,12 @@
                                 //https://stackoverflow.com/questions/35785997/custom-popup-window
                                 //create modal
 
-
-                                var children = await object.children;
-                                if(children.length > 0) {
+                              //children
+                              var children = await object.children;
+                              console.log(children)
+                              if(children == null){
+                                alert("no children to display")
+                              }else  if(children.length > 0) {
                                   var modal = document.getElementById("myModal");
                                   modal.style.display = "block";
                                   var span = document.getElementsByClassName("close")[0];
@@ -216,14 +220,12 @@
                                     var node = document.createElement("div");
                                     var textnode = document.createTextNode(string);
                                     node.id = "children"
+                                    node.className += "listelement"
                                     node.appendChild(textnode);
                                     document.getElementById("modal-content").appendChild(node);
-                                }else {
-                                  alert("no children to display")
                                 }
                                document.getElementById("children").onclick = function() {
                                    for (var children_cls of children) {
-                                       console.log(children_cls.id )
                                        cy.add([{
                                            group: 'nodes',
                                            data: {
@@ -238,17 +240,69 @@
                                        name: 'cose'
                                    }).run()
                                    modal.style.display = "none";
-                                   node.parentNode.removeChild(node);
+                                   var elements = document.getElementsByClassName("listelement");
+                                       while(elements.length > 0){
+                                           elements[0].parentNode.removeChild(elements[0]);
+                                       }
 
                                }
-                                span.onclick = function() {
+
+
+                               //parent
+                               var parent = await object.parents;
+                               console.log(parent)
+                               if(parent == null){
+                                 alert("no parent available")
+                               }else  if(parent.length > 0) {
+                                   var modal = document.getElementById("myModal");
+                                   modal.style.display = "block";
+                                   var span = document.getElementsByClassName("close")[0];
+                                     var string = "load parent (" + parent.length + ")";
+                                     var node = document.createElement("div");
+                                     var textnode = document.createTextNode(string);
+                                     node.id = "parent"
+                                     node.className += "listelement"
+                                     node.appendChild(textnode);
+                                     document.getElementById("modal-content").appendChild(node);
+                                 }
+
+                                 document.getElementById("parent").onclick = function() {
+                                         console.log(parent[0].id)
+                                         cy.add([{
+                                             group: 'nodes',
+                                             data: {
+                                                 id: parent[0].id,
+                                                 label: parent[0].label,
+                                                 object: parent[0]
+                                             }
+                                         },
+                                             {group: 'edges', data: {source: parent[0].id, target: object.id}}]);
+
+                                     cy.layout({
+                                         name: 'cose'
+                                     }).run()
+                                     modal.style.display = "none";
+                                     var elements = document.getElementsByClassName("listelement");
+                                         while(elements.length > 0){
+                                             elements[0].parentNode.removeChild(elements[0]);
+                                         }
+
+                                 }
+
+                               span.onclick = function() {
                                     modal.style.display = "none";
-                                    node.parentNode.removeChild(node)
+                                    var elements = document.getElementsByClassName("listelement");
+                                        while(elements.length > 0){
+                                            elements[0].parentNode.removeChild(elements[0]);
+                                        }
                                 }
                                 window.onclick = function(event) {
                                     if (event.target == modal) {
                                         modal.style.display = "none";
-                                        node.parentNode.removeChild(node)
+                                        var elements = document.getElementsByClassName("listelement");
+                                            while(elements.length > 0){
+                                                elements[0].parentNode.removeChild(elements[0]);
+                                            }
 
                                     }
                                 }
@@ -260,7 +314,6 @@
                           fillColor: 'red',
                           select: function (tmp) {
                             tmp.remove()
-                              //cy.remove(tmp.id)
                           }
                         },
 
@@ -272,7 +325,7 @@
                                 var data = json.data;
                                 var object = data.object;
                                 var parent = await object.parents
-                                console.log(parent);
+                                console.log(parent.length)
                             }
                         }
                     ]
@@ -324,10 +377,17 @@
             },
             async search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
                 var searchedResult = await connector.first_search(searchString);
+                var cytoscape = this.$cytoscape.instance;
+                if(searchedResult.length == 1) {
+                  var cls = searchedResult[0]
+                  console.log("cls")
+                  console.log(cls)
+                  add_data(cls, cytoscape, false)
+                }else {
                 var modal = document.getElementById("myModal");
-               modal.style.display = "block";
+                modal.style.display = "block";
                 var span = document.getElementsByClassName("close")[0];
-                console.log(searchedResult)
+
                 for(var i = 0; i< searchedResult.length; i++){
                   var string = searchedResult[i].label;
                   var node = document.createElement("div");
@@ -337,7 +397,7 @@
                   node.appendChild(textnode);
                   document.getElementById("modal-content").appendChild(node);
                 }
-                var cytoscape = this.$cytoscape.instance;
+
                 var elements = document.querySelectorAll(".selection");
                 for (var i = 0; i < elements.length; i++) {
                     elements[i].onclick = function() {
@@ -345,6 +405,8 @@
                       var cls = searchedResult.find(function(element) {
                         return element.oc_name == id
                       })
+                      console.log("cls")
+                      console.log(cls)
                       add_data(cls, cytoscape, false)
                       modal.style.display = "none";
                       var elements = document.getElementsByClassName("selection");
@@ -353,6 +415,7 @@
                           }
                     }
                 }
+              }
 
 
                 span.onclick = function() {
@@ -374,11 +437,6 @@
 
 
             },
-            async search_for_class_test(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
-                var searchedResult = await connector.first_search(searchString);
-                add_searched_cls_to_graph(searchedResult[0], this.$cytoscape.instance, false)
-
-            }
         }
 
 
@@ -429,13 +487,13 @@
         text-decoration: none;
         cursor: pointer;
     }
-    #children {
+    .listelement {
         border-style: solid;
         border-width: 2px;
         boder-color: #d3d3d3;
         width: 80%;
     }
-    #children:hover {
+    .listelement:hover {
         background-color: #d3d3d3;
         cursor: pointer;
     }
