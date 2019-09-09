@@ -10,6 +10,13 @@
          />
          <input id="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
          <button id="searchClassButton" v-on:click="search_for_class(searchTerm)" ref="mybutton">Search</button>
+         <div>
+           <input
+             placeholder="Enter Text Here"
+             v-model="tempMessage"
+             @keyup.enter="submit"
+           />
+         </div>
         </div>
         <div id="myModal" class="modal">
 
@@ -164,6 +171,7 @@
             return {
                 config,
                 searchTerm: "",
+                tempMessage: "",
                 i: 0
             };
         },
@@ -171,6 +179,10 @@
             //  cytoscape
         },
         methods: {
+          submit: function() {
+            this.$emit("inputData", this.tempMessage);
+            this.tempMessage = "";
+          },
             preConfig(cytoscape) {
                 console.log("calling pre-config");
                 cytoscape.use(cxtmenu);
