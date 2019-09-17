@@ -52,10 +52,14 @@
             {
                 selector: "edge",
                 style: {
+                    'curve-style': 'straight',
                     width: 3,
-                    "line-color": "#ccc",
-                    "target-arrow-color": "#ccc",
-                    "target-arrow-shape": "triangle"
+                    'target-arrow-shape': 'triangle',
+                    label: "data(label)",
+                    'text-rotation': 'autorotate',
+                    "font-size": 7,
+                    "text-margin-x" : 3,
+                    "text-margin-y" : 3
                 }
             }
         ]
@@ -112,7 +116,7 @@
                 //var parent_cls = new OntoCls(parent_cls); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
                 cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
-                    {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
+                    {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "is parent"}}]);
             }
             cy.layout({
                 name: 'cose'
@@ -308,7 +312,7 @@
                                                object: children_cls
                                            }
                                        },
-                                           {group: 'edges', data: {source: children_cls.id, target: object.id}}]);
+                                           {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is children"}}]);
                                    }
                                    cy.layout({
                                        name: 'cose'
@@ -350,7 +354,7 @@
                                                  object: parent[0]
                                              }
                                          },
-                                             {group: 'edges', data: {source: parent[0].id, target: object.id}}]);
+                                             {group: 'edges', data: {source: object.id, target: parent[0].id, label: "" }}]);
 
                                      cy.layout({
                                          name: 'cose'
