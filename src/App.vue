@@ -3,9 +3,7 @@
 
     OntoScope
 
-  <Results  :msg="childData" />
-
-    <CyGraph @inputData="updateMessage" />
+    <CyGraph />
 
   </div>
 </template>
@@ -13,31 +11,15 @@
 <script>
 import CyGraph from './components/CyGraph.vue'
 
-import Results from "./components/Results.vue";
-
 export default {
   name: 'app',
   components: {
     "CyGraph" : CyGraph,
-    "Results" : Results
-  },
-  data: function() {
-    return {
-      childData: ""
-    };
-  },
-  methods: {
-    updateMessage(variable) {
-      this.childData = variable;
-    }
   }
 }
 </script>
 
 <style>
-#results {
-  float:right;
-}
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;

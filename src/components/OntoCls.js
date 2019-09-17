@@ -6,6 +6,7 @@ connector
         this.oc_children = json.children;
         this.oc_annotations = json.annotations;
         this.oc_name = json.name;
+        this.oc_label = json.label
         this.oc_namespace = json.namespace;
         this.oc_parents = json.parents;
         this.oc_shell = json.shell;
@@ -83,7 +84,14 @@ connector
 
 
     get name() {
-        return this.json.label;
+      return this.fillCls().then(data => {
+        for (var anno of this.json.annotations) {
+            if (anno.name === 'label') {
+                //this.label = anno.value;
+                return anno.value;
+            }
+        }
+        })
     }
 
      async fillCls(){

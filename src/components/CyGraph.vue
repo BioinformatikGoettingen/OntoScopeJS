@@ -10,13 +10,12 @@
          />
          <input id="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
          <button id="searchClassButton" v-on:click="search_for_class(searchTerm)" ref="mybutton">Search</button>
-         <div>
-           <input
-             placeholder="Enter Text Here"
-             v-model="tempMessage"
-             @keyup.enter="submit"
-           />
-         </div>
+        </div>
+        <div id = "infopanel">
+          <b> Profile </b>
+          <div id = "profile">
+
+          </div>
         </div>
         <div id="myModal" class="modal">
 
@@ -36,11 +35,7 @@
     import OntoCls from './OntoCls'
     import GenericConnector from "./GenericConnector";  //TODO move to GenericConnecotr
 
-
     let connector = new GenericConnector() //TODO make it dependent on the ontology
-
-
-
 
 
 
@@ -152,6 +147,9 @@
     }
 
 
+
+
+
     /*function load_node(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
           var strr = [];
           axios.defaults.headers = {
@@ -171,18 +169,13 @@
             return {
                 config,
                 searchTerm: "",
-                tempMessage: "",
                 i: 0
             };
         },
         components: {
-            //  cytoscape
+
         },
         methods: {
-          submit: function() {
-            this.$emit("inputData", this.tempMessage);
-            this.tempMessage = "";
-          },
             preConfig(cytoscape) {
                 console.log("calling pre-config");
                 cytoscape.use(cxtmenu);
@@ -195,14 +188,83 @@
                 //cy.on("dragfree", "node", evt => this.setCyElements(cy));
                 // cy.on('tap', 'node', function (event) {
                 //     const data = event.target.data()
-                //     // if you are using vuex you can dispatch your events this way
+                //     //if you are using vuex you can dispatch your events this way
                 //     console.log(event.originalEvent.clientX) ;
                 //     menu2.open(event.originalEvent, menu2)
                 //
                 // })
-                cy.on('tap', 'node', function (event) {
-                    var node = event.target.json();
-                    console.log(node.data.object)
+                cy.on('tap', 'node', async function (event) {
+                  //delete existing elements
+                  var elements = document.getElementsByClassName("infopanelelement");
+                      while(elements.length > 0){
+                          elements[0].parentNode.removeChild(elements[0]);
+                      }
+
+                  var node = event.target.json();
+                  var profile = document.getElementById("profile");
+                  var object = node.data.object;
+                  var name = await object.name;
+                  var id = await object.id;
+                  var def;
+                  for (var anno of object.json.annotations) {
+                    if(anno.name === "def") {
+                      def = anno.value;
+                      }
+                  }
+                  //if def is empty fill with "no defintion available"
+
+                  //create header
+                  var idheader = document.createElement("p");
+                  var nameheader = document.createElement("p");
+                  var defheader = document.createElement("p");
+
+                  idheader.className += "header";
+                  nameheader.className += "header";
+                  defheader.className += "header";
+                  idheader.className += " infopanelelement";
+                  nameheader.className += " infopanelelement";
+                  defheader.className += " infopanelelement";
+
+                  var idheadernode = document.createTextNode("ID:");
+                  var nameheadernode = document.createTextNode("Name:");
+                  var defheadernode = document.createTextNode("Defintion:");
+
+                  idheader.appendChild(idheadernode);
+                  nameheader.appendChild(nameheadernode);
+                  defheader.appendChild(defheadernode);
+
+
+                  //create text
+                  var idtext = document.createElement("p");
+                  var nametext = document.createElement("p");
+                  var deftext = document.createElement("p");
+
+                  idtext.className += "text";
+                  nametext.className += "text";
+                  deftext.className += "text";
+                  idtext.className += " infopanelelement";
+                  nametext.className += " infopanelelement";
+                  deftext.className += " infopanelelement";
+
+                  var idtextnode = document.createTextNode(id);
+                  var nametextnode = document.createTextNode(name);
+                  var deftextnode = document.createTextNode(def);
+
+                  idtext.appendChild(idtextnode);
+                  nametext.appendChild(nametextnode);
+                  deftext.appendChild(deftextnode);
+
+                  var profile = document.getElementById("profile");
+
+                  profile.appendChild(idheader);
+                  profile.appendChild(idtext);
+
+                  profile.appendChild(nameheader);
+                  profile.appendChild(nametext);
+
+                  profile.appendChild(defheader);
+                  profile.appendChild(deftext);
+
                 });
                 //if nodes need different context menue, we need to create a cy.cxtmenu for each type of node
                 menu = cy.cxtmenu({
@@ -332,12 +394,11 @@
                         {
                             content: 'get parent',
                             fillColor: 'pink',
-                            select: async function (tmp) {
-                                var json = tmp.json();
-                                var data = json.data;
-                                var object = data.object;
-                                var parent = await object.parents
-                                console.log(parent.length)
+                            select: function (tmp) {
+                              var json = tmp.json();
+                              var data = json.data;
+                              var object = data.object;
+
                             }
                         }
                     ]
@@ -449,6 +510,7 @@
 
 
             },
+
         }
 
 
@@ -459,9 +521,17 @@
 
 <style>
     #holder {
-        width: 600px;
-        height: 600px;
+        width: 79%;
+        height: 75vh;
         border: 1px red solid;
+        float:left;
+    }
+    #infopanel {
+      background-color: lightgrey;
+        border: 1px grey solid;
+      float: right;
+      width: 20%;
+      height: 75vh;
     }
     .modal {
         display: none; /* Hidden by default */
@@ -518,6 +588,10 @@
     .selection:hover {
         background-color: #d3d3d3;
         cursor: pointer;
+    }
+    .header {
+      font-weight: bold;
+      background-color: rgba(0,0,0,0.16);
     }
     /*#app {*/
     /*font-family: "Avenir", Helvetica, Arial, sans-serif;*/

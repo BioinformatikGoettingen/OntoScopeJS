@@ -4,8 +4,11 @@
     <li v-for="(message, index) in messageList" :item="message" :key="index">
       {{ message }}
     </li>
-    <h3> Name : {{ name }} </h3>
+    <h3> Name : </h3>
+
   </div>
+
+
 </template>
 
 <script>
