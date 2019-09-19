@@ -29,26 +29,39 @@
 </template>
 
 <script>
+
+
     import axios from 'axios'
     import CyObj from '@/components/cy-object'
     import cxtmenu from 'cytoscape-cxtmenu'
     import OntoCls from './OntoCls'
-    import GenericConnector from "./GenericConnector";  //TODO move to GenericConnecotr
+    import GenericConnector from "./GenericConnector"
+    //import TriboliumConnector from "./TriboliumConnector"
+
 
     let connector = new GenericConnector() //TODO make it dependent on the ontology
+    //let triboliumConnector = new TriboliumConnector()
 
-
+    var devStageColor = []
+    var colors = ["#001f3f","#0074D9","#7FDBFF", "#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"]
 
     /* eslint-disable */
     const config = {
         style: [
+
+
             {
                 selector: "node",
                 style: {
-                    "background-color": "#666",
-                    label: "data(label)"
+                    "background-color": "data(color)",
+                    label: "data(label)",
+                    "height": 20,
+                    "width": 20,
+                    "font-size": 10
                 }
             },
+
+
             {
                 selector: "edge",
                 style: {
@@ -61,6 +74,12 @@
                     "text-margin-x" : 3,
                     "text-margin-y" : 3
                 }
+            },
+            {
+              selector: ':selected',
+              style: {
+                "background-color": "#ff8566"
+              }
             }
         ]
     };
@@ -79,93 +98,43 @@
 
     }
 
-    function add_node_with_parents(onto_cls, cyInst) {
-        //todo check if node is already in graph.
-
-        cyInst.then(cy => {
-            cy.add([{
-                group: 'nodes',
-                data: {id: onto_cls.id, label: onto_cls.label, children: onto_cls.json.children, data: onto_cls}
-            }]);
-            for (const parent of onto_cls.parents) {
-                //var parent_cls = new OntoCls(p); // set flag to fill object
-                //var searchString = parent_cls.label
-                cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, data: parent_cls}},
-                    {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id}}]);
-            }
-            cy.layout({
-                name: 'cose'
-            }).run();
-        })
-    }
-
-    async function add_data(onto_cls, cyInst) { // what is the diffence to the function above???
+    async function add_data(onto_cls, cyInst) {
+      //alert (ONTOLOGYNAME)
+        var devStage = await onto_cls.devStage
+        if(!devStageColor[devStage]){
+          devStageColor[devStage] = colors[0]
+          colors.shift();
+        }
+        var tmp = [] ;
+        for (const parent_cls of onto_cls.parents) {
+          var devStageParent =  await parent_cls.devStage;
+          tmp[parent_cls.id] = devStageParent;
+          if(!devStageColor[devStageParent]){
+            devStageColor[devStageParent] = colors[0]
+            colors.shift();
+          }
+        }
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {
                     id: onto_cls.id,
                     label: onto_cls.label,
-                    object: onto_cls
+                    object: onto_cls,
+                    color: devStageColor[devStage]
             }}]);
-            console.log("adding parents for " + onto_cls.id)
-            console.log(onto_cls)
-
             for (const parent_cls of onto_cls.parents) {
-              console.log("test")
-              console.log(parent_cls)
+
+             var parentdev = tmp[parent_cls.id]
               //var parent_cls =  connector.createNewOntoCs(parent_cls)
                 //var parent_cls = new OntoCls(parent_cls); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
-                cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls}},
-                    {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "is parent"}}]);
+                cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color: devStageColor[parentdev]}},
+                    {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass"}}]);
             }
             cy.layout({
                 name: 'cose'
             }).run();
         })
     }
-
-    function add_node_with_children(onto_cls, cyInst) {
-        cyInst.then(cy => {
-            cy.add([{group: 'nodes', data: {id: onto_cls.id, label: onto_cls.label, creation: onto_cls.created_by}}]);
-            for (const children_cls of onto_cls.json.children) {
-                //var children_cls = new OntoCls(p); // set flag to fill object
-                //load data
-                // Problem: kein zugriff auf die daten
-                //  var children_cls_data = load_node(children_cls.label)
-                cy.add([{
-                    group: 'nodes',
-                    data: {
-                        id: children_cls.id,
-                        label: children_cls.label,
-                        data: children_cls_data,
-                        children: children_cls
-                    }
-                },
-                    {group: 'edges', data: {source: children_cls.id, target: onto_cls.id}}]);
-
-            }
-            cy.layout({
-                name: "cose"
-            }).run();
-        })
-    }
-
-
-
-
-
-    /*function load_node(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
-          var strr = [];
-          axios.defaults.headers = {
-              'Accept': 'application/json'
-          };
-          axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString)
-              .then(function (response) {
-              strr.push(response.data.entities[0])
-
-              });
-              return strr;
-    }*/
 
     export default {
         name: "CyGraph",
@@ -200,15 +169,17 @@
                 cy.on('tap', 'node', async function (event) {
                   //delete existing elements
                   var elements = document.getElementsByClassName("infopanelelement");
-                      while(elements.length > 0){
-                          elements[0].parentNode.removeChild(elements[0]);
-                      }
-
+                  while(elements.length > 0){
+                      elements[0].parentNode.removeChild(elements[0]);
+                  }
                   var node = event.target.json();
                   var profile = document.getElementById("profile");
                   var object = node.data.object;
                   var name = await object.name;
                   var id = await object.id;
+                  //var devStage;
+                  var devStage = await object.devStage;
+
                   var def;
                   for (var anno of object.json.annotations) {
                     if(anno.name === "def") {
@@ -221,42 +192,54 @@
                   var idheader = document.createElement("p");
                   var nameheader = document.createElement("p");
                   var defheader = document.createElement("p");
+                  var devStageheader = document.createElement("p");
 
                   idheader.className += "header";
                   nameheader.className += "header";
                   defheader.className += "header";
+                  devStageheader.className += "header";
+
                   idheader.className += " infopanelelement";
                   nameheader.className += " infopanelelement";
                   defheader.className += " infopanelelement";
+                  devStageheader.className += " infopanelelement";
 
                   var idheadernode = document.createTextNode("ID:");
                   var nameheadernode = document.createTextNode("Name:");
                   var defheadernode = document.createTextNode("Defintion:");
+                  var devStageheadernode = document.createTextNode("Developmental Stage:");
+
 
                   idheader.appendChild(idheadernode);
                   nameheader.appendChild(nameheadernode);
                   defheader.appendChild(defheadernode);
+                  devStageheader.appendChild(devStageheadernode);
 
 
                   //create text
                   var idtext = document.createElement("p");
                   var nametext = document.createElement("p");
                   var deftext = document.createElement("p");
+                  var devStagetext = document.createElement("p");
 
                   idtext.className += "text";
                   nametext.className += "text";
                   deftext.className += "text";
+                  devStagetext.className += "text";
                   idtext.className += " infopanelelement";
                   nametext.className += " infopanelelement";
                   deftext.className += " infopanelelement";
+                  devStagetext.className += " infopanelelement";
 
                   var idtextnode = document.createTextNode(id);
                   var nametextnode = document.createTextNode(name);
                   var deftextnode = document.createTextNode(def);
+                  var devStagetextnode = document.createTextNode(devStage);
 
                   idtext.appendChild(idtextnode);
                   nametext.appendChild(nametextnode);
                   deftext.appendChild(deftextnode);
+                  devStagetext.appendChild(devStagetextnode);
 
                   var profile = document.getElementById("profile");
 
@@ -269,6 +252,8 @@
                   profile.appendChild(defheader);
                   profile.appendChild(deftext);
 
+                  profile.appendChild(devStageheader);
+                  profile.appendChild(devStagetext);
                 });
                 //if nodes need different context menue, we need to create a cy.cxtmenu for each type of node
                 menu = cy.cxtmenu({
@@ -302,17 +287,23 @@
                                     node.appendChild(textnode);
                                     document.getElementById("modal-content").appendChild(node);
                                 }
-                               document.getElementById("children").onclick = function() {
+                               document.getElementById("children").onclick = async function() {
                                    for (var children_cls of children) {
+                                      var devStage = await children_cls.devStage
+                                      if(!devStageColor[devStage]){
+                                        devStageColor[devStage] = colors[0]
+                                        colors.shift();
+                                      }
                                        cy.add([{
                                            group: 'nodes',
                                            data: {
                                                id: children_cls.id,
                                                label: children_cls.label,
-                                               object: children_cls
+                                               object: children_cls,
+                                               color: devStageColor[devStage]
                                            }
                                        },
-                                           {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is children"}}]);
+                                           {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a"}}]);
                                    }
                                    cy.layout({
                                        name: 'cose'
@@ -344,17 +335,22 @@
                                      document.getElementById("modal-content").appendChild(node);
                                  }
 
-                                 document.getElementById("parent").onclick = function() {
-                                         console.log(parent[0].id)
+                                 document.getElementById("parent").onclick = async function() {
+                                        var devStage = await parent[0].devStage
+                                        if(!devStageColor[devStage]){
+                                          devStageColor[devStage] = colors[0]
+                                          colors.shift();
+                                        }
                                          cy.add([{
                                              group: 'nodes',
                                              data: {
                                                  id: parent[0].id,
                                                  label: parent[0].label,
-                                                 object: parent[0]
+                                                 object: parent[0],
+                                                 color: devStageColor[devStage]
                                              }
                                          },
-                                             {group: 'edges', data: {source: object.id, target: parent[0].id, label: "" }}]);
+                                             {group: 'edges', data: {source: parent[0].id, target: object.id, label: "subclass"}}]);
 
                                      cy.layout({
                                          name: 'cose'
@@ -396,12 +392,14 @@
                         },
 
                         {
-                            content: 'get parent',
+                            content: 'get devStage',
                             fillColor: 'pink',
-                            select: function (tmp) {
+                            select: async function (tmp) {
                               var json = tmp.json();
                               var data = json.data;
                               var object = data.object;
+                              var dev = await object.devStage;
+                              console.log(dev)
 
                             }
                         }
@@ -536,6 +534,7 @@
       float: right;
       width: 20%;
       height: 75vh;
+      overflow:auto;
     }
     .modal {
         display: none; /* Hidden by default */

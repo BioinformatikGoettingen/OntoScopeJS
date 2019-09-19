@@ -9,6 +9,7 @@
 </template>
 
 <script>
+
 import CyGraph from './components/CyGraph.vue'
 
 export default {

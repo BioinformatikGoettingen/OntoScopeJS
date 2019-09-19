@@ -1,7 +1,7 @@
 export default class OntoCls {
 connector
-
-    constructor(json, connector) {
+//triboliumConnector
+    constructor(json, connector, triboliumConnector) {
         this.json = json;
         this.oc_children = json.children;
         this.oc_annotations = json.annotations;
@@ -10,13 +10,11 @@ connector
         this.oc_namespace = json.namespace;
         this.oc_parents = json.parents;
         this.oc_shell = json.shell;
-        console.log("constructor")
-        console.log(this)
-        console.log(json.shell)
 
         //var shell = this.json.shell
         //var children = this.json.children
         this.connector = connector
+        //this.triboliumConnector = triboliumConnector
     }
 
     get id() {
@@ -94,18 +92,30 @@ connector
         })
     }
 
+    get devStage() {
+      return this.connector.getDevStageOfCls(this).then(data => {
+        if(data === undefined) {
+          return "undefined";
+        }else {
+          var data = data.data.annotations;
+          for (var anno of data) {
+              if (anno.name === 'label') {
+                return anno.value;
+              }
+          }
+        }
+      })
+
+    }
+
      async fillCls(){
         //console.log("filling class " + this.id)
-         console.log("fillCls()")
-         console.log(this)
         const promise = await this.connector.get_cls_data(this)
         var data =  promise.data;
-        console.log("fetched data, now fill with" )
         // console.log(data)
         // console.log(data)
         //await this.fillWithTemplate(data)
         this.fillWithTemplate(data)
-         console.log(this)
 
          return promise
 

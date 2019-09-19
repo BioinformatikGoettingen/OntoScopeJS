@@ -1,10 +1,13 @@
 import axios from 'axios'
 import OntoCls from "./OntoCls";
 
+
+var ONTOLOGYNAME = "tribolium"
 export default class GenericConnector {
 
 
-    async search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
+
+    async search_for_class(searchString, url = "http://oba.sybig.de", ontology = ONTOLOGYNAME) {
         axios.defaults.headers = {
             'Accept': 'application/json'
         };
@@ -23,7 +26,7 @@ export default class GenericConnector {
         return result_cls
     }
     //returns the results in an array
-    async first_search(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
+    async first_search(searchString, url = "http://oba.sybig.de", ontology = ONTOLOGYNAME) {
         axios.defaults.headers = {
             'Accept': 'application/json'
         };
@@ -43,7 +46,7 @@ export default class GenericConnector {
     async get_cls_data(Cls) {
         try {
             var url = "http://oba.sybig.de";
-            var ontology = "tribolium";
+            var ontology = ONTOLOGYNAME;
             var cls_id = Cls.id;
             console.log("fetching " + cls_id)
             axios.defaults.headers = {
@@ -56,6 +59,28 @@ export default class GenericConnector {
             });
 
             //console.log(await response)
+            return await response
+
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    async getDevStageOfCls(Cls) {
+        try {
+            var cls_id = Cls.id;
+            var SUB_RESOURCE = "functions/tribolium/";
+            var URL = "http://oba.sybig.de/";
+            var OntologyName = ONTOLOGYNAME;
+            axios.defaults.headers = {
+                'Accept': 'application/json'
+            };
+            let response = await axios({
+                url: URL + OntologyName + "/" + SUB_RESOURCE + 'devStageOfCls/' + cls_id,
+                method: "get",
+                timeout: 8000
+            });
+
             return await response
 
         } catch (err) {
