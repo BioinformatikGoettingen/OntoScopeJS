@@ -17,6 +17,7 @@
 
           </div>
         </div>
+        <table id = "legend"></table>
         <div id="myModal" class="modal">
 
             <!-- Modal content -->
@@ -48,8 +49,6 @@
     /* eslint-disable */
     const config = {
         style: [
-
-
             {
                 selector: "node",
                 style: {
@@ -60,8 +59,6 @@
                     "font-size": 10
                 }
             },
-
-
             {
                 selector: "edge",
                 style: {
@@ -78,40 +75,80 @@
             {
               selector: ':selected',
               style: {
-                "background-color": "#ff8566"
+                "background-color": "red"
               }
             }
         ]
     };
 
-    function add_searched_cls_to_graph(json_response, cy) {
-        //temporary function to add the first node, will be replaced by a selection list
-        //console.log("add first node from search result")
-        // if (json_response.status !== 200 || json_response.data.entities.length < 1) {
-        //     console.log("no entities found");
-        //     return;
-        // }
-        var onto_cls2 = new OntoCls(json_response.json);
-        var onto_cls = json_response
-        add_data(onto_cls, cy);
-
-
-    }
 
     async function add_data(onto_cls, cyInst) {
-      //alert (ONTOLOGYNAME)
-        var devStage = await onto_cls.devStage
-        if(!devStageColor[devStage]){
-          devStageColor[devStage] = colors[0]
-          colors.shift();
-        }
-        var tmp = [] ;
-        for (const parent_cls of onto_cls.parents) {
-          var devStageParent =  await parent_cls.devStage;
-          tmp[parent_cls.id] = devStageParent;
-          if(!devStageColor[devStageParent]){
-            devStageColor[devStageParent] = colors[0]
+        if(connector.ontoname == "tribolium") {
+          var devStage = await onto_cls.devStage
+          if(!devStageColor[devStage]){
+            devStageColor[devStage] = colors[0]
+            var table = document.getElementById("legend");
+            var tr = document.createElement("tr");
+            var tddot = document.createElement("td");
+            var tddesc = document.createElement("td");
+
+            var tddotnode = document.createElement("span");
+            tddotnode.className += "dot"
+            tddotnode.style.backgroundColor = colors[0]
+
+            var tddescnode = document.createTextNode(devStage)
+
+            tddot.appendChild(tddotnode);
+            tddesc.appendChild(tddescnode);
+
+            tr.appendChild(tddot);
+            tr.appendChild(tddesc);
+
+            table.appendChild(tr)
+            table.style.display = "block"
+
+          /*  var legend = document.createElement("span");
+            legend.className += "dot"
+            legend.style.backgroundColor = colors[0]
+            var legenddiv = document.getElementById("legend")
+            legenddiv.style.display = "block"
+
+            var legenddesc = document.createElement("p")
+            legenddesc.appendChild(document.createTextNode(devStage))
+            legenddiv.appendChild(legenddesc);
+
+            legenddiv.appendChild(legend);*/
             colors.shift();
+          }
+          var tmp = [] ;
+          for (const parent_cls of onto_cls.parents) {
+            var devStageParent =  await parent_cls.devStage;
+            tmp[parent_cls.id] = devStageParent;
+            if(!devStageColor[devStageParent]){
+              devStageColor[devStageParent] = colors[0]
+              var table = document.getElementById("legend");
+              var tr = document.createElement("tr");
+              var tddot = document.createElement("td");
+              var tddesc = document.createElement("td");
+
+              var tddotnode = document.createElement("span");
+              tddotnode.className += "dot"
+              tddotnode.style.backgroundColor = colors[0]
+
+
+              var tddescnode = document.createTextNode(devStage)
+
+              tddot.appendChild(tddotnode);
+              tddesc.appendChild(tddescnode);
+
+              tr.appendChild(tddot);
+              tr.appendChild(tddesc);
+
+              table.appendChild(tr)
+              table.style.display = "block"
+
+              colors.shift();
+            }
           }
         }
         cyInst.then(cy => {
@@ -122,8 +159,9 @@
                     color: devStageColor[devStage]
             }}]);
             for (const parent_cls of onto_cls.parents) {
-
-             var parentdev = tmp[parent_cls.id]
+              if(connector.ontoname == "tribolium") {
+                var parentdev = tmp[parent_cls.id]
+              }
               //var parent_cls =  connector.createNewOntoCs(parent_cls)
                 //var parent_cls = new OntoCls(parent_cls); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
@@ -266,16 +304,17 @@
                                 var json = tmp.json();
                                 var data = json.data;
                                 var object = data.object;
-                                //https://vuejs.org/v2/examples/modal.html
-                                //https://stackoverflow.com/questions/35785997/custom-popup-window
-                                //create modal
+
+
+                                var children = await object.children;
+                                var parent = await object.parents;
+
+                              if(children == null && parent == null) {
+                                alert("no children or parent to display")
+                              }
 
                               //children
-                              var children = await object.children;
-                              console.log(children)
-                              if(children == null){
-                                alert("no children to display")
-                              }else  if(children.length > 0) {
+                              if(children.length > 0 && children != null) {
                                   var modal = document.getElementById("myModal");
                                   modal.style.display = "block";
                                   var span = document.getElementsByClassName("close")[0];
@@ -286,13 +325,35 @@
                                     node.className += "listelement"
                                     node.appendChild(textnode);
                                     document.getElementById("modal-content").appendChild(node);
-                                }
+
                                document.getElementById("children").onclick = async function() {
                                    for (var children_cls of children) {
-                                      var devStage = await children_cls.devStage
-                                      if(!devStageColor[devStage]){
-                                        devStageColor[devStage] = colors[0]
-                                        colors.shift();
+                                        if(connector.ontoname == "tribolium") {
+                                          var devStage = await children_cls.devStage
+                                          if(!devStageColor[devStage]){
+                                            devStageColor[devStage] = colors[0]
+                                            var table = document.getElementById("legend");
+                                            var tr = document.createElement("tr");
+                                            var tddot = document.createElement("td");
+                                            var tddesc = document.createElement("td");
+
+                                            var tddotnode = document.createElement("span");
+                                            tddotnode.className += "dot"
+                                            tddotnode.style.backgroundColor = colors[0]
+
+                                            var tddescnode = document.createTextNode(devStage)
+
+                                            tddot.appendChild(tddotnode);
+                                            tddesc.appendChild(tddescnode);
+
+                                            tr.appendChild(tddot);
+                                            tr.appendChild(tddesc);
+
+                                            table.appendChild(tr)
+                                            table.style.display = "block"
+
+                                            colors.shift();
+                                          }
                                       }
                                        cy.add([{
                                            group: 'nodes',
@@ -315,14 +376,10 @@
                                        }
 
                                }
-
+                             }
 
                                //parent
-                               var parent = await object.parents;
-                               console.log(parent)
-                               if(parent == null){
-                                 alert("no parent available")
-                               }else  if(parent.length > 0) {
+                              if(parent.length > 0 && parent != null) {
                                    var modal = document.getElementById("myModal");
                                    modal.style.display = "block";
                                    var span = document.getElementsByClassName("close")[0];
@@ -333,14 +390,36 @@
                                      node.className += "listelement"
                                      node.appendChild(textnode);
                                      document.getElementById("modal-content").appendChild(node);
-                                 }
 
                                  document.getElementById("parent").onclick = async function() {
+                                     if(connector.ontoname == "tribolium") {
                                         var devStage = await parent[0].devStage
                                         if(!devStageColor[devStage]){
                                           devStageColor[devStage] = colors[0]
+
+                                          var table = document.getElementById("legend");
+                                          var tr = document.createElement("tr");
+                                          var tddot = document.createElement("td");
+                                          var tddesc = document.createElement("td");
+
+                                          var tddotnode = document.createElement("span");
+                                          tddotnode.className += "dot"
+                                          tddotnode.style.backgroundColor = colors[0]
+
+                                          var tddescnode = document.createTextNode(devStage)
+
+                                          tddot.appendChild(tddotnode);
+                                          tddesc.appendChild(tddescnode);
+
+                                          tr.appendChild(tddot);
+                                          tr.appendChild(tddesc);
+
+                                          table.appendChild(tr)
+                                          table.style.display = "block"
+
                                           colors.shift();
                                         }
+                                      }
                                          cy.add([{
                                              group: 'nodes',
                                              data: {
@@ -362,6 +441,7 @@
                                          }
 
                                  }
+                                  }
 
                                span.onclick = function() {
                                     modal.style.display = "none";
@@ -381,6 +461,7 @@
                                     }
                                 }
 
+
                             }
                         },
                         {
@@ -389,19 +470,6 @@
                           select: function (tmp) {
                             tmp.remove()
                           }
-                        },
-
-                        {
-                            content: 'get devStage',
-                            fillColor: 'pink',
-                            select: async function (tmp) {
-                              var json = tmp.json();
-                              var data = json.data;
-                              var object = data.object;
-                              var dev = await object.devStage;
-                              console.log(dev)
-
-                            }
                         }
                     ]
                 });
@@ -536,29 +604,30 @@
       height: 75vh;
       overflow:auto;
     }
+    #legend {
+      border: 1px grey solid;
+      float: right;
+      display: none;
+    }
     .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
+        display: none;
+        position: fixed;
+        z-index: 1;
         left: 0;
         top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgb(0,0,0); /* Fallback color */
-        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
     }
-
-    /* Modal Content/Box */
     .modal-content {
         background-color: #fefefe;
-        margin: 15% auto; /* 15% from the top and centered */
+        margin: 15% auto;
         padding: 20px;
         border: 1px solid #888;
-        width: 80%; /* Could be more or less, depending on screen size */
+        width: 80%;
     }
-
-    /* The Close Button */
     .close {
         color: #aaa;
         float: right;
@@ -596,12 +665,10 @@
       font-weight: bold;
       background-color: rgba(0,0,0,0.16);
     }
-    /*#app {*/
-    /*font-family: "Avenir", Helvetica, Arial, sans-serif;*/
-    /*-webkit-font-smoothing: antialiased;*/
-    /*-moz-osx-font-smoothing: grayscale;*/
-    /*text-align: left;*/
-    /*color: #2c3e50;*/
-    /*margin-top: 60px;*/
-    /*}*/
+    .dot {
+      height: 15px;
+      width: 15px;
+      border-radius: 50%;
+      display: inline-block;
+}
 </style>

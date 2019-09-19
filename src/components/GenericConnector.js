@@ -1,22 +1,21 @@
 import axios from 'axios'
 import OntoCls from "./OntoCls";
 
-
-var ONTOLOGYNAME = "tribolium"
 export default class GenericConnector {
 
+    constructor() {
+      this.ontoname = "tribolium"
+  }
 
-
-    async search_for_class(searchString, url = "http://oba.sybig.de", ontology = ONTOLOGYNAME) {
+    async search_for_class(searchString, url = "http://oba.sybig.de") {
+      alert(window.ontorname)
         axios.defaults.headers = {
             'Accept': 'application/json'
         };
 
-        const response = await axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString + "*")
+        const response = await axios.get(url + '/' + this.ontoname + "/functions/basic/searchCls/" + searchString + "*")
         //TODO if their is no result, repeat the search once with wildcard
         let result_cls = []
-        console.log("response.data")
-        console.log(response.data)
         var data = response.data.entities[0]
         for (let jsonCls of response.data.entities) {
             let cls = this.createNewOntoCs(jsonCls)
@@ -26,12 +25,12 @@ export default class GenericConnector {
         return result_cls
     }
     //returns the results in an array
-    async first_search(searchString, url = "http://oba.sybig.de", ontology = ONTOLOGYNAME) {
+    async first_search(searchString, url = "http://oba.sybig.de") {
         axios.defaults.headers = {
             'Accept': 'application/json'
         };
 
-        const response = await axios.get(url + '/' + ontology + "/functions/basic/searchCls/" + searchString + "*")
+        const response = await axios.get(url + '/' + this.ontoname + "/functions/basic/searchCls/" + searchString + "*")
         let result_cls = []
 
         for (let jsonCls of response.data.entities) {
@@ -46,14 +45,13 @@ export default class GenericConnector {
     async get_cls_data(Cls) {
         try {
             var url = "http://oba.sybig.de";
-            var ontology = ONTOLOGYNAME;
             var cls_id = Cls.id;
             console.log("fetching " + cls_id)
             axios.defaults.headers = {
                 'Accept': 'application/json'
             };
             let response = await axios({
-                url: url + '/' + ontology + "/cls/" + cls_id, // add also (encoded) NS
+                url: url + '/' + this.ontoname + "/cls/" + cls_id, // add also (encoded) NS
                 method: "get",
                 timeout: 8000
             });
@@ -71,12 +69,11 @@ export default class GenericConnector {
             var cls_id = Cls.id;
             var SUB_RESOURCE = "functions/tribolium/";
             var URL = "http://oba.sybig.de/";
-            var OntologyName = ONTOLOGYNAME;
             axios.defaults.headers = {
                 'Accept': 'application/json'
             };
             let response = await axios({
-                url: URL + OntologyName + "/" + SUB_RESOURCE + 'devStageOfCls/' + cls_id,
+                url: URL + this.ontoname + "/" + SUB_RESOURCE + 'devStageOfCls/' + cls_id,
                 method: "get",
                 timeout: 8000
             });
