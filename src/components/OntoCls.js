@@ -10,17 +10,26 @@ connector
         this.oc_namespace = json.namespace;
         this.oc_parents = json.parents;
         this.oc_shell = json.shell;
-
-        //var shell = this.json.shell
-        //var children = this.json.children
+        this.oc_properties = json.properties;
         this.connector = connector
-        //this.triboliumConnector = triboliumConnector
     }
 
     get id() {
         return this.oc_name;
     }
 
+    get properties() {
+
+      if (this.oc_shell) {
+          console.log("hier getproperties")
+          return this.fillCls().then(data => {
+              return this.oc_properties
+          });
+      }else {
+          return this.oc_properties
+      }
+        return this.oc_properties
+    }
 
     get children() {
          console.log("get children for " + this.label)
@@ -112,20 +121,14 @@ connector
         //console.log("filling class " + this.id)
         const promise = await this.connector.get_cls_data(this)
         var data =  promise.data;
-        // console.log(data)
-        // console.log(data)
-        //await this.fillWithTemplate(data)
         this.fillWithTemplate(data)
 
-         return promise
+        return promise
 
     }
 
 
     fillWithTemplate(data) {
-      console.log("fillWithTemplate")
-      console.log(data)
-      console.log(this)
         const json_cls = data
         this.oc_children = []
         for (let c of json_cls.children){
@@ -136,12 +139,12 @@ connector
         this.oc_name = json_cls.name;
         this.oc_namespace = json_cls.namespace;
         this.oc_parents = []
+        this.oc_properties = json_cls.properties
         for (let c of json_cls.parents){
             this.oc_parents.push(this.connector.createNewOntoCs(c))
         }
        // this.oc_parents = json_cls.parents;
         this.json = json_cls
-        console.log(this)
     }
 
 

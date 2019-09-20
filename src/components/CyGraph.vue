@@ -87,6 +87,7 @@
           var devStage = await onto_cls.devStage
           if(!devStageColor[devStage]){
             devStageColor[devStage] = colors[0]
+
             var table = document.getElementById("legend");
             var tr = document.createElement("tr");
             var tddot = document.createElement("td");
@@ -107,21 +108,11 @@
             table.appendChild(tr)
             table.style.display = "block"
 
-          /*  var legend = document.createElement("span");
-            legend.className += "dot"
-            legend.style.backgroundColor = colors[0]
-            var legenddiv = document.getElementById("legend")
-            legenddiv.style.display = "block"
-
-            var legenddesc = document.createElement("p")
-            legenddesc.appendChild(document.createTextNode(devStage))
-            legenddiv.appendChild(legenddesc);
-
-            legenddiv.appendChild(legend);*/
             colors.shift();
           }
           var tmp = [] ;
           for (const parent_cls of onto_cls.parents) {
+            //parent_cls.fillCls()
             var devStageParent =  await parent_cls.devStage;
             tmp[parent_cls.id] = devStageParent;
             if(!devStageColor[devStageParent]){
@@ -136,7 +127,7 @@
               tddotnode.style.backgroundColor = colors[0]
 
 
-              var tddescnode = document.createTextNode(devStage)
+              var tddescnode = document.createTextNode(devStageParent)
 
               tddot.appendChild(tddotnode);
               tddesc.appendChild(tddescnode);
@@ -150,7 +141,7 @@
               colors.shift();
             }
           }
-        }
+
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {
                     id: onto_cls.id,
@@ -172,6 +163,21 @@
                 name: 'cose'
             }).run();
         })
+
+      } else {
+
+        cyInst.then(cy => {
+            cy.add([{group: 'nodes', data: {
+                    id: onto_cls.label,
+                    label: onto_cls.label,
+                    object: onto_cls,
+                    color: "#666"
+            }}]);
+            cy.layout({
+                name: 'cose'
+            }).run();
+        })
+      }
     }
 
     export default {
@@ -298,6 +304,9 @@
                     selector: 'node',
                     commands: [
                         {
+                          // hier neben children und parent auch abfragen welche properties es gibt
+                          // und diese als expand verfügbar machen
+                          //
                             content: "expand",
                             fillColor: 'green',
                             select: async function (tmp) {
@@ -305,16 +314,110 @@
                                 var data = json.data;
                                 var object = data.object;
 
-
+                                var properties = await object.properties;
                                 var children = await object.children;
                                 var parent = await object.parents;
 
-                              if(children == null && parent == null) {
-                                alert("no children or parent to display")
-                              }
+                                if(children == null && parent == null && !properties) {
+                                  alert("no children, parents or properties to display")
+                                }else {
+
+                                  //properties
+                                  if(properties != null){
+                                    var propertytype = []
+                                    for (var properties_cls of properties) {
+                                      console.log(properties_cls);
+                                      console.log(properties_cls.property.name)
+                                      console.log(properties_cls.target.name)
+                                      //create a array with all types of
+                                      if(!propertytype.includes(properties_cls.property.name)){
+                                        propertytype.push(properties_cls.property.name)
+                                      }
+                                    }
+                                    for( var type of propertytype){
+                                      var modal = document.getElementById("myModal");
+
+                                      modal.style.display = "block";
+                                      var span = document.getElementsByClassName("close")[0];
+                                      var string = "load: "+ type;
+                                      var node = document.createElement("div");
+                                      var textnode = document.createTextNode(string);
+                                      node.id = type
+                                      node.className += "listelement"
+                                      node.appendChild(textnode);
+                                      document.getElementById("modal-content").appendChild(node);
+                                    console.log(propertytype)
+                                    }
+                                  }
+                              /*  if(properties != null){
+                                if(properties.length > 0) {
+                                    var modal = document.getElementById("myModal");
+                                    modal.style.display = "block";
+                                    var span = document.getElementsByClassName("close")[0];
+                                      var string = "load properties (" + properties.length + ")";
+                                      var node = document.createElement("div");
+                                      var textnode = document.createTextNode(string);
+                                      node.id = "properties"
+                                      node.className += "listelement"
+                                      node.appendChild(textnode);
+                                      document.getElementById("modal-content").appendChild(node);
+
+                                 document.getElementById("properties").onclick = async function() {
+                                     for (var properties_cls of properties) {
+                                          if(connector.ontoname == "tribolium") {
+                                            var devStage = await children_cls.devStage
+                                            if(!devStageColor[devStage]){
+                                              devStageColor[devStage] = colors[0]
+                                              var table = document.getElementById("legend");
+                                              var tr = document.createElement("tr");
+                                              var tddot = document.createElement("td");
+                                              var tddesc = document.createElement("td");
+
+                                              var tddotnode = document.createElement("span");
+                                              tddotnode.className += "dot"
+                                              tddotnode.style.backgroundColor = colors[0]
+
+                                              var tddescnode = document.createTextNode(devStage)
+
+                                              tddot.appendChild(tddotnode);
+                                              tddesc.appendChild(tddescnode);
+
+                                              tr.appendChild(tddot);
+                                              tr.appendChild(tddesc);
+
+                                              table.appendChild(tr)
+                                              table.style.display = "block"
+
+                                              colors.shift();
+                                            }
+                                        }
+                                         cy.add([{
+                                             group: 'nodes',
+                                             data: {
+                                                 id: properties_cls.id,
+                                                 label: children_cls.label,
+                                                 object: children_cls,
+                                                 color: devStageColor[devStage]
+                                             }
+                                         },
+                                             {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a"}}]);
+                                     }
+                                     cy.layout({
+                                         name: 'cose'
+                                     }).run()
+                                     modal.style.display = "none";
+                                     var elements = document.getElementsByClassName("listelement");
+                                         while(elements.length > 0){
+                                             elements[0].parentNode.removeChild(elements[0]);
+                                         }
+
+                                 }
+                               }
+                             }*/
 
                               //children
-                              if(children.length > 0 && children != null) {
+                                if(children != null){
+                                  if(children.length > 0) {
                                   var modal = document.getElementById("myModal");
                                   modal.style.display = "block";
                                   var span = document.getElementsByClassName("close")[0];
@@ -376,10 +479,11 @@
                                        }
 
                                }
-                             }
-
+                                  }
+                                }
                                //parent
-                              if(parent.length > 0 && parent != null) {
+                                if(parent != null) {
+                                 if(parent.length > 0 ) {
                                    var modal = document.getElementById("myModal");
                                    modal.style.display = "block";
                                    var span = document.getElementsByClassName("close")[0];
@@ -460,9 +564,10 @@
 
                                     }
                                 }
-
+                                }
 
                             }
+                          }
                         },
                         {
                           content: 'delete node',
@@ -495,20 +600,6 @@
             setCyElements(cy) {
                 console.log("setCyElements");
                 let cytoElems = [
-                    //{
-                    // node a
-                    // data: {id: "a"},
-                    //position: {x: 100, y: 100}
-                    //},
-                    //{
-                    // node b
-                    //data: {id: "b"},
-                    //position: {x: 200, y: 100}
-                    //},
-                    //{
-                    // edge ab
-                    //data: {id: "ab", source: "a", target: "b"}
-                    // }
                 ];
                 cy.startBatch();
                 cy.elements().remove();
@@ -518,13 +609,15 @@
                 cy.endBatch();
                 cy.fit();
             },
-            async search_for_class(searchString, url = "http://oba.sybig.de", ontology = "tribolium") {
+            async search_for_class(searchString, url = "http://oba.sybig.de") {
+                var ontology = connector.ontoname
                 var searchedResult = await connector.first_search(searchString);
                 var cytoscape = this.$cytoscape.instance;
                 if(searchedResult.length == 1) {
                   var cls = searchedResult[0]
-                  console.log("cls")
-                  console.log(cls)
+                  if(ontology == "tribolium"){
+                      cls.fillCls();
+                  }
                   add_data(cls, cytoscape, false)
                 }else {
                 var modal = document.getElementById("myModal");
@@ -548,9 +641,10 @@
                       var cls = searchedResult.find(function(element) {
                         return element.oc_name == id
                       })
-                      console.log("cls")
-                      console.log(cls)
-                      add_data(cls, cytoscape, false)
+                      if(ontology == "tribolium"){
+                          cls.fillCls();
+                       }
+                      add_data(cls, cytoscape)
                       modal.style.display = "none";
                       var elements = document.getElementsByClassName("selection");
                           while(elements.length > 0){

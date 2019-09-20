@@ -8,7 +8,6 @@ export default class GenericConnector {
   }
 
     async search_for_class(searchString, url = "http://oba.sybig.de") {
-      alert(window.ontorname)
         axios.defaults.headers = {
             'Accept': 'application/json'
         };
@@ -36,9 +35,15 @@ export default class GenericConnector {
         for (let jsonCls of response.data.entities) {
           var data = jsonCls;
             let cls = this.createNewOntoCs(jsonCls)
-            cls.fillWithTemplate(data)
+            //fill with template lite, das nur das label und den namen und die annotations übernimt, aber keine e
+            // eigene Anfrage an den Server stellt, somit sollte die Performance deutlich verbessert werden
+
+            //
+
+            //cls.fillCls()
             result_cls.push(cls)
         }
+        console.log(result_cls)
         return result_cls
     }
 
