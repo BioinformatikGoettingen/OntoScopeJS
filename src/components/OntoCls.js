@@ -6,7 +6,12 @@ connector
         this.oc_children = json.children;
         this.oc_annotations = json.annotations;
         this.oc_name = json.name;
-        this.oc_label = json.label
+        if(connector.ontoname == "tribolium") {
+          this.oc_label = json.label
+        }
+        if(connector.ontoname == "cytomer") {
+          this.oc_label = json.name
+        }
         this.oc_namespace = json.namespace;
         this.oc_parents = json.parents;
         this.oc_shell = json.shell;
@@ -19,6 +24,7 @@ connector
     }
 
     get properties() {
+      console.log("get properties for " + this.label)
 
       if (this.oc_shell) {
           console.log("hier getproperties")
@@ -60,20 +66,6 @@ connector
                return this.oc_parents
            }
       }
-
-    /*get parents(){
-        console.log("get parents " + this.oc_parents + "  _ " + this.json.parents)
-        console.log(this.json.parents)
-        if (this.oc_parents === undefined && this.json.parents.length > 0){
-            //TODO check if the root node is handled correct and add a comment here why json.parents.length > 0
-            // this.fillCls()
-            this.oc_parents = []
-            for (let p of this.json.parents){
-                this.parents.push(this.connector.createNewOntoCs(p))
-            }
-        }
-        return this.oc_parents
-    }*/
 
 
     get label() {
@@ -131,7 +123,7 @@ connector
     fillWithTemplate(data) {
         const json_cls = data
         this.oc_children = []
-        for (let c of json_cls.children){
+        for (let c of json_cls.children) {
             this.oc_children.push(this.connector.createNewOntoCs(c))
         }
         this.oc_shell = json_cls.shell;
@@ -139,7 +131,16 @@ connector
         this.oc_name = json_cls.name;
         this.oc_namespace = json_cls.namespace;
         this.oc_parents = []
-        this.oc_properties = json_cls.properties
+        this.oc_properties = json_cls.properties;
+        this.oc_properties = []
+        for (let c of json_cls.properties){
+          this.oc_properties.push({
+            "property" : c.property,
+            "target" : this.connector.createNewOntoCs(c.target)
+          })
+
+
+        }
         for (let c of json_cls.parents){
             this.oc_parents.push(this.connector.createNewOntoCs(c))
         }

@@ -4,7 +4,7 @@ import OntoCls from "./OntoCls";
 export default class GenericConnector {
 
     constructor() {
-      this.ontoname = "tribolium"
+      this.ontoname = "cytomer"
   }
 
     async search_for_class(searchString, url = "http://oba.sybig.de") {

@@ -83,7 +83,7 @@
 
 
     async function add_data(onto_cls, cyInst) {
-        if(connector.ontoname == "tribolium") {
+
           var devStage = await onto_cls.devStage
           if(!devStageColor[devStage]){
             devStageColor[devStage] = colors[0]
@@ -110,6 +110,7 @@
 
             colors.shift();
           }
+
           var tmp = [] ;
           for (const parent_cls of onto_cls.parents) {
             //parent_cls.fillCls()
@@ -136,11 +137,12 @@
               tr.appendChild(tddesc);
 
               table.appendChild(tr)
-              table.style.display = "block"
+            table.style.display = "block"
 
               colors.shift();
             }
           }
+      var tmp = await onto_cls.fillCls();
 
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {
@@ -149,10 +151,12 @@
                     object: onto_cls,
                     color: devStageColor[devStage]
             }}]);
+
             for (const parent_cls of onto_cls.parents) {
               if(connector.ontoname == "tribolium") {
                 var parentdev = tmp[parent_cls.id]
               }
+              console.log(parent_cls)
               //var parent_cls =  connector.createNewOntoCs(parent_cls)
                 //var parent_cls = new OntoCls(parent_cls); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
@@ -164,20 +168,7 @@
             }).run();
         })
 
-      } else {
 
-        cyInst.then(cy => {
-            cy.add([{group: 'nodes', data: {
-                    id: onto_cls.label,
-                    label: onto_cls.label,
-                    object: onto_cls,
-                    color: "#666"
-            }}]);
-            cy.layout({
-                name: 'cose'
-            }).run();
-        })
-      }
     }
 
     export default {
@@ -219,6 +210,7 @@
                   var node = event.target.json();
                   var profile = document.getElementById("profile");
                   var object = node.data.object;
+                  console.log(object)
                   var name = await object.name;
                   var id = await object.id;
                   //var devStage;
@@ -314,9 +306,12 @@
                                 var data = json.data;
                                 var object = data.object;
 
+
                                 var properties = await object.properties;
                                 var children = await object.children;
                                 var parent = await object.parents;
+
+
 
                                 if(children == null && parent == null && !properties) {
                                   alert("no children, parents or properties to display")
@@ -326,94 +321,48 @@
                                   if(properties != null){
                                     var propertytype = []
                                     for (var properties_cls of properties) {
-                                      console.log(properties_cls);
-                                      console.log(properties_cls.property.name)
-                                      console.log(properties_cls.target.name)
                                       //create a array with all types of
                                       if(!propertytype.includes(properties_cls.property.name)){
                                         propertytype.push(properties_cls.property.name)
                                       }
                                     }
                                     for( var type of propertytype){
+                                      //load all nodes of certain type
+                                      var nodes_of_type = []
+                                      console.log(type)
+                                      for(var prop  of properties){
+                                        if(prop.property.name === type){
+                                          nodes_of_type.push(prop)
+                                          //nodes_of_type.push(prop.target)
+                                        }
+                                      }
+                                      nodes_of_type.id = type
+                                      console.log(nodes_of_type)
+
                                       var modal = document.getElementById("myModal");
 
                                       modal.style.display = "block";
                                       var span = document.getElementsByClassName("close")[0];
-                                      var string = "load: "+ type;
+                                      var string = "load "+ type + "(" + nodes_of_type.length + ")";
                                       var node = document.createElement("div");
                                       var textnode = document.createTextNode(string);
                                       node.id = type
                                       node.className += "listelement"
                                       node.appendChild(textnode);
                                       document.getElementById("modal-content").appendChild(node);
-                                    console.log(propertytype)
+
+                                      // hier dann node erstellen
+                                      // HIER PROBLEM MIT nodes_of_type : WIRD ÜBERSCHRIEBEN! Hier muss nochmal ein array erstellt werden
+                                    document.getElementById(type).onclick = async function() {
+                                      console.log(nodes_of_type)
+                                      modal.style.display = "none";
+                                      var elements = document.getElementsByClassName("listelement");
+                                          while(elements.length > 0){
+                                              elements[0].parentNode.removeChild(elements[0]);
+                                          }
+                                        }
                                     }
                                   }
-                              /*  if(properties != null){
-                                if(properties.length > 0) {
-                                    var modal = document.getElementById("myModal");
-                                    modal.style.display = "block";
-                                    var span = document.getElementsByClassName("close")[0];
-                                      var string = "load properties (" + properties.length + ")";
-                                      var node = document.createElement("div");
-                                      var textnode = document.createTextNode(string);
-                                      node.id = "properties"
-                                      node.className += "listelement"
-                                      node.appendChild(textnode);
-                                      document.getElementById("modal-content").appendChild(node);
-
-                                 document.getElementById("properties").onclick = async function() {
-                                     for (var properties_cls of properties) {
-                                          if(connector.ontoname == "tribolium") {
-                                            var devStage = await children_cls.devStage
-                                            if(!devStageColor[devStage]){
-                                              devStageColor[devStage] = colors[0]
-                                              var table = document.getElementById("legend");
-                                              var tr = document.createElement("tr");
-                                              var tddot = document.createElement("td");
-                                              var tddesc = document.createElement("td");
-
-                                              var tddotnode = document.createElement("span");
-                                              tddotnode.className += "dot"
-                                              tddotnode.style.backgroundColor = colors[0]
-
-                                              var tddescnode = document.createTextNode(devStage)
-
-                                              tddot.appendChild(tddotnode);
-                                              tddesc.appendChild(tddescnode);
-
-                                              tr.appendChild(tddot);
-                                              tr.appendChild(tddesc);
-
-                                              table.appendChild(tr)
-                                              table.style.display = "block"
-
-                                              colors.shift();
-                                            }
-                                        }
-                                         cy.add([{
-                                             group: 'nodes',
-                                             data: {
-                                                 id: properties_cls.id,
-                                                 label: children_cls.label,
-                                                 object: children_cls,
-                                                 color: devStageColor[devStage]
-                                             }
-                                         },
-                                             {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a"}}]);
-                                     }
-                                     cy.layout({
-                                         name: 'cose'
-                                     }).run()
-                                     modal.style.display = "none";
-                                     var elements = document.getElementsByClassName("listelement");
-                                         while(elements.length > 0){
-                                             elements[0].parentNode.removeChild(elements[0]);
-                                         }
-
-                                 }
-                               }
-                             }*/
 
                               //children
                                 if(children != null){
@@ -524,6 +473,11 @@
                                           colors.shift();
                                         }
                                       }
+                                    /*  if(connector.ontoname == "cytomer") {
+                                        var tmp = parent[0]
+                                        console.log(tmp.oc_name)
+                                      }*/
+
                                          cy.add([{
                                              group: 'nodes',
                                              data: {
@@ -615,10 +569,10 @@
                 var cytoscape = this.$cytoscape.instance;
                 if(searchedResult.length == 1) {
                   var cls = searchedResult[0]
-                  if(ontology == "tribolium"){
+                //  if(ontology == "tribolium"){
                       cls.fillCls();
-                  }
-                  add_data(cls, cytoscape, false)
+                //  }
+                  add_data(cls, cytoscape)
                 }else {
                 var modal = document.getElementById("myModal");
                 modal.style.display = "block";
@@ -636,14 +590,14 @@
 
                 var elements = document.querySelectorAll(".selection");
                 for (var i = 0; i < elements.length; i++) {
-                    elements[i].onclick = function() {
-                      var id = event.srcElement.id
+                    elements[i].onclick = async function() {
+                      var id = await event.srcElement.id
                       var cls = searchedResult.find(function(element) {
                         return element.oc_name == id
                       })
-                      if(ontology == "tribolium"){
+                    //  if(ontology == "tribolium"){
                           cls.fillCls();
-                       }
+                      // }
                       add_data(cls, cytoscape)
                       modal.style.display = "none";
                       var elements = document.getElementsByClassName("selection");
