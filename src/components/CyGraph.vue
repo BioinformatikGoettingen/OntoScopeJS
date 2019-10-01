@@ -83,8 +83,9 @@
 
 
     async function add_data(onto_cls, cyInst) {
-
+        console.log(onto_cls)
           var devStage = await onto_cls.devStage
+
           if(!devStageColor[devStage]){
             devStageColor[devStage] = colors[0]
 
@@ -112,7 +113,10 @@
           }
 
           var tmp = [] ;
+          var paren = await onto_cls.parents;
+          console.log(onto_cls.parents)
           for (const parent_cls of onto_cls.parents) {
+
             //parent_cls.fillCls()
             var devStageParent =  await parent_cls.devStage;
             tmp[parent_cls.id] = devStageParent;
@@ -142,7 +146,8 @@
               colors.shift();
             }
           }
-      var tmp = await onto_cls.fillCls();
+
+      await onto_cls.fillCls();
 
         cyInst.then(cy => {
             cy.add([{group: 'nodes', data: {
@@ -156,7 +161,7 @@
               if(connector.ontoname == "tribolium") {
                 var parentdev = tmp[parent_cls.id]
               }
-              console.log(parent_cls)
+
               //var parent_cls =  connector.createNewOntoCs(parent_cls)
                 //var parent_cls = new OntoCls(parent_cls); // TODO get parent should return OntoClass objects
                 //var searchString = parent_cls.label
@@ -296,9 +301,6 @@
                     selector: 'node',
                     commands: [
                         {
-                          // hier neben children und parent auch abfragen welche properties es gibt
-                          // und diese als expand verfügbar machen
-                          //
                             content: "expand",
                             fillColor: 'green',
                             select: async function (tmp) {
@@ -316,28 +318,26 @@
                                 if(children == null && parent == null && !properties) {
                                   alert("no children, parents or properties to display")
                                 }else {
-
+                                  var propertytype = []
                                   //properties
-                                  if(properties != null){
-                                    var propertytype = []
+                                if(properties != null){
+
                                     for (var properties_cls of properties) {
                                       //create a array with all types of
                                       if(!propertytype.includes(properties_cls.property.name)){
                                         propertytype.push(properties_cls.property.name)
                                       }
                                     }
+
                                     for( var type of propertytype){
                                       //load all nodes of certain type
                                       var nodes_of_type = []
-                                      console.log(type)
                                       for(var prop  of properties){
                                         if(prop.property.name === type){
                                           nodes_of_type.push(prop)
                                           //nodes_of_type.push(prop.target)
                                         }
                                       }
-                                      nodes_of_type.id = type
-                                      console.log(nodes_of_type)
 
                                       var modal = document.getElementById("myModal");
 
@@ -354,7 +354,53 @@
                                       // hier dann node erstellen
                                       // HIER PROBLEM MIT nodes_of_type : WIRD ÜBERSCHRIEBEN! Hier muss nochmal ein array erstellt werden
                                     document.getElementById(type).onclick = async function() {
-                                      console.log(nodes_of_type)
+                                        for (var properties_cls of properties) {
+                                          if(properties_cls.property.name === this.id) {
+
+                                            if(connector.ontoname == "tribolium") {
+                                              var devStage = await properties_cls.target.devStage
+                                              if(!devStageColor[devStage]){
+                                                devStageColor[devStage] = colors[0]
+                                                var table = document.getElementById("legend");
+                                                var tr = document.createElement("tr");
+                                                var tddot = document.createElement("td");
+                                                var tddesc = document.createElement("td");
+
+                                                var tddotnode = document.createElement("span");
+                                                tddotnode.className += "dot"
+                                                tddotnode.style.backgroundColor = colors[0]
+
+                                                var tddescnode = document.createTextNode(devStage)
+
+                                                tddot.appendChild(tddotnode);
+                                                tddesc.appendChild(tddescnode);
+
+                                                tr.appendChild(tddot);
+                                                tr.appendChild(tddesc);
+
+                                                table.appendChild(tr)
+                                                table.style.display = "block"
+
+                                                colors.shift();
+                                              }
+                                            }else {
+                                              await properties_cls.target.devStage
+                                            }
+                                            cy.add([{
+                                               group: 'nodes',
+                                               data: {
+                                                   id: properties_cls.target.id,
+                                                   label: properties_cls.target.label,
+                                                   object: properties_cls.target,
+                                                   color: devStageColor[devStage]
+                                               }
+                                            },
+                                               {group: 'edges', data: {source: properties_cls.target.id, target: object.id, label: properties_cls.property.name}}]);
+                                          }
+                                        }
+                                        cy.layout({
+                                            name: 'cose'
+                                        }).run()
                                       modal.style.display = "none";
                                       var elements = document.getElementsByClassName("listelement");
                                           while(elements.length > 0){
@@ -444,9 +490,13 @@
                                      node.appendChild(textnode);
                                      document.getElementById("modal-content").appendChild(node);
 
+
+
+
                                  document.getElementById("parent").onclick = async function() {
+                                    for(var parent_cls of parent) {
                                      if(connector.ontoname == "tribolium") {
-                                        var devStage = await parent[0].devStage
+                                        var devStage = await parent_cls.devStage
                                         if(!devStageColor[devStage]){
                                           devStageColor[devStage] = colors[0]
 
@@ -481,14 +531,14 @@
                                          cy.add([{
                                              group: 'nodes',
                                              data: {
-                                                 id: parent[0].id,
-                                                 label: parent[0].label,
-                                                 object: parent[0],
+                                                 id: parent_cls.id,
+                                                 label: parent_cls.label,
+                                                 object: parent_cls,
                                                  color: devStageColor[devStage]
                                              }
                                          },
-                                             {group: 'edges', data: {source: parent[0].id, target: object.id, label: "subclass"}}]);
-
+                                             {group: 'edges', data: {source: parent_cls.id, target: object.id, label: "subclass"}}]);
+                                           }
                                      cy.layout({
                                          name: 'cose'
                                      }).run()
@@ -498,7 +548,8 @@
                                              elements[0].parentNode.removeChild(elements[0]);
                                          }
 
-                                 }
+
+                               }
                                   }
 
                                span.onclick = function() {

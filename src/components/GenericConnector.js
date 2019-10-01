@@ -71,6 +71,7 @@ export default class GenericConnector {
 
     async getDevStageOfCls(Cls) {
         try {
+
             var cls_id = Cls.id;
             var SUB_RESOURCE = "functions/tribolium/";
             var URL = "http://oba.sybig.de/";
