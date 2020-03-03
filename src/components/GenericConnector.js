@@ -4,7 +4,8 @@ import OntoCls from "./OntoCls";
 export default class GenericConnector {
 
     constructor() {
-      this.ontoname = "cytomer"
+      const urlParams = new URLSearchParams(window.location.search);
+      this.ontoname = urlParams.get("ontology");
   }
 
     async search_for_class(searchString, url = "http://oba.sybig.de") {
@@ -38,7 +39,6 @@ export default class GenericConnector {
             //fill with template lite, das nur das label und den namen und die annotations übernimt, aber keine e
             // eigene Anfrage an den Server stellt, somit sollte die Performance deutlich verbessert werden
 
-            //
 
             //cls.fillCls()
             result_cls.push(cls)

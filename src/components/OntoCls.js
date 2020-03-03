@@ -87,7 +87,6 @@ connector
         return this.json.name;
     }
 
-
     get name() {
       return this.fillCls().then(data => {
         for (var anno of this.json.annotations) {
@@ -95,7 +94,7 @@ connector
                 //this.label = anno.value;
                 return anno.value;
             }
-        }
+          }
         })
     }
 
