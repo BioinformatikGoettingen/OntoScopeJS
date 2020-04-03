@@ -4,9 +4,20 @@ import OntoCls from "./OntoCls";
 export default class GenericConnector {
 
     constructor() {
-      const urlParams = new URLSearchParams(window.location.search);
-      this.ontoname = urlParams.get("ontology");
-  }
+        const urlParams = new URLSearchParams(window.location.search);
+        this.ontoname = urlParams.get("ontology");
+        /*jQuery.getScript("./TriboliumConnector.js")
+            .done(function() {
+                console.log("success");
+            })
+            .fail(function(jqxhr, settings, exception) {
+                console.log(jqxhr);
+                console.log(settings);
+                console.log(exception)
+            });*/
+        //var file = require("./TriboliumConnector");
+        //console.log(file);
+    }
 
     async search_for_class(searchString, url = "http://oba.sybig.de") {
         axios.defaults.headers = {
@@ -84,7 +95,7 @@ export default class GenericConnector {
                 timeout: 8000
             });
 
-            return await response
+            return await response;
 
         } catch (err) {
             console.log(err)
