@@ -6,7 +6,7 @@
 }
 #infopanel {
   background-color: white;
-    border: 1px grey solid;
+  border: 1px grey solid;
   float: right;
   width: 20%;
   height: 75vh;
@@ -31,16 +31,37 @@
 }
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
+    margin-left: auto;
     border: 1px solid #888;
-    width: 50%;
+    width: 30%;
+    padding-top:8%;
+}
+#modal-header {
+  background-color: lightgray;
+  width: 30%;
+  border: 1px solid #888;
+  position: sticky;
+  float: right;
+  right: 0;
+  top:0;
+}
+#heading {
+  font-weight: bold;
+  padding-bottom: 2%;
+  padding-left: 2%;
+}
+#subtitle {
+  padding-bottom: 5%;
+  padding-left: 2%;
+
 }
 .close {
     color: #aaa;
-    float: right;
     font-size: 28px;
     font-weight: bold;
+    right: 2%;
+    top:0;
+    position: fixed;
 }
 
 .close:hover,
@@ -49,27 +70,24 @@
     text-decoration: none;
     cursor: pointer;
 }
-.listelement {
-    width: 80%;
+.selection, .listelement {   
+    padding-left: 10px;
+    padding-bottom: 10px;
+    float: top;
 }
-.listelement:hover {
+.selection:hover, .listelement:hover {
     background-color: #d3d3d3;
     cursor: pointer;
 }
-.selection {   
-    width: 80%;
-}
-.selection:hover {
-    background-color: #d3d3d3;
-    cursor: pointer;
-}
-.header {
-  font-weight: bold;
-  background-color: rgba(0,0,0,0.16);
-}
+
 .dot {
   height: 15px;
   width: 15px;
   border-radius: 50%;
   display: inline-block;
+}
+
+.header {
+  font-weight: bold;
+  background-color: rgba(0,0,0,0.16);
 }

@@ -19,12 +19,12 @@
         </div>
         <table id = "legend"></table>
         <div id="myModal" class="modal">
-
-            <!-- Modal content -->
-            <div id ="modal-content" class="modal-content">
-                <h2> Expand the graph</h2>
-                <span class="close">&times;</span>
-            </div>
+            <div id = "modal-header">
+                <div id = "heading"> </div>
+                <span class="close">&times;</span>  
+                <div id = "subtitle"> </div>
+             </div>
+            <div id ="modal-content" class="modal-content"></div>
         </div>
     </div>
 </template>

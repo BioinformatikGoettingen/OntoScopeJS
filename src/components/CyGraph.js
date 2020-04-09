@@ -17,6 +17,8 @@ var configuration = ontology_parser.parse(path)
 configuration.then(function(value){
   var loadedurl = value[0]['url'];
   var loadedlink = value[0]['link'];
+  console.log(loadedlink);
+  console.log(loadedurl);
   var newload = ontology_parser.parse(loadedlink)
   newload.then( 
     console.log(newload)
@@ -257,7 +259,10 @@ export default {
                                   }
 
                                   var modal = document.getElementById("myModal");
-
+                                  var heading = document.getElementById("heading");
+                                  heading.innerHTML =  "Expand the Graph";
+                                  var subtitle = document.getElementById("subtitle");
+                                  subtitle.innerHTML = "Please select the relation to be added to the graph";
                                   modal.style.display = "block";
                                   var span = document.getElementsByClassName("close")[0];
                                   var string = "load "+ type + "(" + nodes_of_type.length + ")";
@@ -534,14 +539,17 @@ export default {
             var modal = document.getElementById("myModal");
             modal.style.display = "block";
             var span = document.getElementsByClassName("close")[0];
-
+            var heading = document.getElementById("heading");
+            heading.innerHTML =  "SearchResult";
+            var subtitle = document.getElementById("subtitle");
+            subtitle.innerHTML = "Please select one ontology class to add to the graph";
             for(var i = 0; i< searchedResult.length; i++){
               var string = searchedResult[i].label;
               var node = document.createElement("div");
-              var textnode = document.createTextNode(string);
+              var textnode2 = document.createTextNode(string);
                node.classList.add("selection");
                node.id = searchedResult[i].id
-              node.appendChild(textnode);
+              node.appendChild(textnode2);
               document.getElementById("modal-content").appendChild(node);
             }
 
