@@ -4,26 +4,23 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import OntoCls from './OntoCls'
 import GenericConnector from "./GenericConnector"
 import ontology_parser from "./ontology_parser"
+import { get_color_of_node } from './TriboliumConnector'
 
 let connector = new GenericConnector() //TODO make it dependent on the ontology
-//let triboliumConnector = new TriboliumConnector()
-
 
 var urlParams = new URLSearchParams(window.location.search);
-var path = urlParams.get("ontologypackage")
 
-
+// load the config file from the url
+var path = urlParams.get("config")
 var configuration = ontology_parser.parse(path)
 configuration.then(function(value){
   var loadedurl = value[0]['url'];
   var loadedlink = value[0]['link'];
-  console.log(loadedlink);
-  console.log(loadedurl);
-  var newload = ontology_parser.parse(loadedlink)
-  newload.then( 
-    console.log(newload)
-  )
 })
+
+//var connectorpath = urlParams.get("ontologypackage")
+//var loadedconnector = ontology_parser.parse(connectorpath)
+
 
 
 var devStageColor = []
@@ -37,22 +34,23 @@ const config = {
             style: {
                 "background-color": "data(color)",
                 label: "data(label)",
-                "height": 20,
-                "width": 20,
-                "font-size": 10
+                "height": 5,
+                "width": 5,
+                "font-size": 3
             }
         },
         {
             selector: "edge",
             style: {
                 'curve-style': 'straight',
-                width: 3,
+                width: 0.5,
                 'target-arrow-shape': 'triangle',
                 label: "data(label)",
                 'text-rotation': 'autorotate',
-                "font-size": 7,
-                "text-margin-x" : 3,
-                "text-margin-y" : 3
+                "font-size": 2,
+                "text-margin-x" : 1,
+                "text-margin-y" : 1,
+                "arrow-scale": 0.4
             }
         },
         {
@@ -68,7 +66,6 @@ const config = {
 async function add_data(onto_cls, cyInst) {
     console.log(onto_cls)
       var devStage = await onto_cls.devStage
-
       if(!devStageColor[devStage]){
         devStageColor[devStage] = colors[0]
 
@@ -80,7 +77,7 @@ async function add_data(onto_cls, cyInst) {
         var tddotnode = document.createElement("span");
         tddotnode.className += "dot"
         tddotnode.style.backgroundColor = colors[0]
-
+        //tddotnode.style.backgroundColor = get_color_of_node(tddotnode);
         var tddescnode = document.createTextNode(devStage)
 
         tddot.appendChild(tddotnode);
@@ -132,12 +129,14 @@ async function add_data(onto_cls, cyInst) {
 
   await onto_cls.fillCls();
 
+    //first node plus parent added
     cyInst.then(cy => {
         cy.add([{group: 'nodes', data: {
                 id: onto_cls.id,
                 label: onto_cls.label,
                 object: onto_cls,
-                color: devStageColor[devStage]
+                //color: devStageColor[devStage]
+                color: get_color_of_node(onto_cls)
         }}]);
 
         for (const parent_cls of onto_cls.parents) {
@@ -233,6 +232,35 @@ export default {
                             var properties = await object.properties;
                             var children = await object.children;
                             var parent = await object.parents;
+                            var modal = document.getElementById("myModal");
+                            var heading = document.getElementById("heading");
+                            heading.innerHTML =  "Expand the Graph";
+                            var subtitle = document.getElementById("subtitle");
+                            subtitle.innerHTML = "Please select the relation to be added to the graph";
+                            
+                            //check if expand menu is needed
+                            var children_exist = true;
+                            var parent_exist = true;
+                            var properties_exist = true;
+
+                            if(children ==  null){
+                              children_exist = false
+                            }else if (children.length == 0 ){
+                              children_exist = false
+                            }
+                            if(parent ==  null){
+                              parent_exist = false
+                            }else if (parent.length == 0 ){
+                              parent_exist = false
+                            }
+                            if(properties ==  null){
+                              properties_exist = false
+                            }else if (properties.length == 0 ){
+                              properties_exist = false
+                            }
+                            if(!children_exist && !parent_exist && !properties_exist) {
+                              alert("nothing to expand")
+                            }
 
                             if(children == null && parent == null && !properties) {
                               alert("no children, parents or properties to display")
@@ -258,11 +286,7 @@ export default {
                                     }
                                   }
 
-                                  var modal = document.getElementById("myModal");
-                                  var heading = document.getElementById("heading");
-                                  heading.innerHTML =  "Expand the Graph";
-                                  var subtitle = document.getElementById("subtitle");
-                                  subtitle.innerHTML = "Please select the relation to be added to the graph";
+                                  
                                   modal.style.display = "block";
                                   var span = document.getElementsByClassName("close")[0];
                                   var string = "load "+ type + "(" + nodes_of_type.length + ")";

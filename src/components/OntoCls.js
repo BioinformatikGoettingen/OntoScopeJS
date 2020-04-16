@@ -6,7 +6,6 @@ connector
         this.oc_children = json.children;
         this.oc_annotations = json.annotations;
         this.oc_name = json.name;
-
         if(connector.ontoname == "cytomer") {
           this.oc_label = json.name
         }else {
@@ -20,7 +19,11 @@ connector
         this.oc_namespace = json.namespace;
         this.oc_parents = json.parents;
         this.oc_shell = json.shell;
-        this.oc_properties = json.properties;
+        if(json.properties){
+         this.oc_properties = json.properties;
+        }else {
+          this.oc_properties = null;
+        }
         this.connector = connector
     }
 
@@ -39,7 +42,6 @@ connector
       }else {
           return this.oc_properties
       }
-        return this.oc_properties
     }
 
     get children() {
@@ -116,7 +118,7 @@ connector
 
     }
 
-     async fillCls(){
+     async fillCls() {
         console.log("filling class " + this.id)
         const promise = await this.connector.get_cls_data(this)
         var data =  promise.data;

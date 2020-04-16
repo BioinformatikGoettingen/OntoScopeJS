@@ -6,17 +6,6 @@ export default class GenericConnector {
     constructor() {
         const urlParams = new URLSearchParams(window.location.search);
         this.ontoname = urlParams.get("ontology");
-        /*jQuery.getScript("./TriboliumConnector.js")
-            .done(function() {
-                console.log("success");
-            })
-            .fail(function(jqxhr, settings, exception) {
-                console.log(jqxhr);
-                console.log(settings);
-                console.log(exception)
-            });*/
-        //var file = require("./TriboliumConnector");
-        //console.log(file);
     }
 
     async search_for_class(searchString, url = "http://oba.sybig.de") {
@@ -66,8 +55,10 @@ export default class GenericConnector {
             axios.defaults.headers = {
                 'Accept': 'application/json'
             };
+            console.log(url + '/' + this.ontoname + "/cls/" + cls_id)
             let response = await axios({
                 url: url + '/' + this.ontoname + "/cls/" + cls_id, // add also (encoded) NS
+    
                 method: "get",
                 timeout: 8000
             });

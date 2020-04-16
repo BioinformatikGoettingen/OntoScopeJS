@@ -1,7 +1,7 @@
 const configuration = [
   {
     "url": "http://oba.sybig.de",
-    "link": "./tribolium.conf"
+    "link": "./tribolium_render.js"
   }
 ]
 export {configuration} 
