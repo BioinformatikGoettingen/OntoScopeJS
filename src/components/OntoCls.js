@@ -1,7 +1,7 @@
 export default class OntoCls {
 connector
 //triboliumConnector
-    constructor(json, connector, triboliumConnector) {
+    constructor(json, connector) {
         this.json = json;
         this.oc_children = json.children;
         this.oc_annotations = json.annotations;
@@ -19,6 +19,7 @@ connector
         this.oc_namespace = json.namespace;
         this.oc_parents = json.parents;
         this.oc_shell = json.shell;
+        //this.color = "red";
         if(json.properties){
          this.oc_properties = json.properties;
         }else {
@@ -100,6 +101,38 @@ connector
         })
     }
 
+    get config () {
+      console.log("hier get config")
+      return this.load_config().then(data => {
+        return data.configuration[0]['link']
+      })
+    }
+    async load_config() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var configpath = urlParams.get("config")
+      var configpromise = await import(`${configpath}`)
+      return configpromise
+    }
+
+    get color() {
+      //if(this.color != undefined || this.color == null){
+        //load the color from the 
+      //}
+      console.log("hier get color")
+      return this.load_connector().then(data => {
+      
+        return data.default()
+      })
+      
+    }
+
+    async load_connector(){
+      //var urlParams = new URLSearchParams(window.location.search);
+      var connectorpath = await this.load_config()
+      var connectorpromise = await import(`${connectorpath.configuration[0]['link']}`)
+      return connectorpromise
+    }
+
     get devStage() {
       console.log("get devStage for " + this.connector)
 
@@ -118,13 +151,13 @@ connector
 
     }
 
-     async fillCls() {
-        console.log("filling class " + this.id)
-        const promise = await this.connector.get_cls_data(this)
-        var data =  promise.data;
-        this.fillWithTemplate(data)
+    async fillCls() {
+      console.log("filling class " + this.id)
+      const promise = await this.connector.get_cls_data(this)
+      var data =  promise.data;
+      this.fillWithTemplate(data)
 
-        return promise
+      return promise
 
     }
 

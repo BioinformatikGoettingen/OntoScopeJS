@@ -4,27 +4,28 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import OntoCls from './OntoCls'
 import GenericConnector from "./GenericConnector"
 import ontology_parser from "./ontology_parser"
-import { get_color_of_node } from './TriboliumConnector'
+
 
 let connector = new GenericConnector() //TODO make it dependent on the ontology
 
 var urlParams = new URLSearchParams(window.location.search);
+var configpath = urlParams.get("config")
 
-// load the config file from the url
-var path = urlParams.get("config")
-var configuration = ontology_parser.parse(path)
-configuration.then(function(value){
-  var loadedurl = value[0]['url'];
-  var loadedlink = value[0]['link'];
+const loadedcolors = 
+import(`${configpath}`).then(function(configcallback){
+  var triboliumtest = configcallback
+  //console.log("configcallback:" + configcallback.configuration[0]['colors'])
+  const loadedcolors = configcallback.configuration[0]['colors']
+
+  return loadedcolors
 })
 
-//var connectorpath = urlParams.get("ontologypackage")
-//var loadedconnector = ontology_parser.parse(connectorpath)
-
+//const tribconnector = () => import(`${connectorpath}`)
 
 
 var devStageColor = []
-var colors = ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"]
+
+//var colors = ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"]
 
 /* eslint-disable */
 const config = {
@@ -66,6 +67,8 @@ const config = {
 async function add_data(onto_cls, cyInst) {
     console.log(onto_cls)
       var devStage = await onto_cls.devStage
+      var colors = await loadedcolors
+      
       if(!devStageColor[devStage]){
         devStageColor[devStage] = colors[0]
 
@@ -93,12 +96,14 @@ async function add_data(onto_cls, cyInst) {
       }
 
       var tmp = [] ;
-      var paren = await onto_cls.parents;
+      var parent = await onto_cls.parents;
       console.log(onto_cls.parents)
+      
       for (const parent_cls of onto_cls.parents) {
 
         //parent_cls.fillCls()
         var devStageParent =  await parent_cls.devStage;
+        var colors = await loadedcolors
         tmp[parent_cls.id] = devStageParent;
         if(!devStageColor[devStageParent]){
           devStageColor[devStageParent] = colors[0]
@@ -128,23 +133,24 @@ async function add_data(onto_cls, cyInst) {
       }
 
   await onto_cls.fillCls();
+  var color = await onto_cls.color
 
     //first node plus parent added
-    cyInst.then(cy => {
+  cyInst.then(cy => {
         cy.add([{group: 'nodes', data: {
                 id: onto_cls.id,
                 label: onto_cls.label,
                 object: onto_cls,
+                color: color
                 //color: devStageColor[devStage]
-                color: get_color_of_node(onto_cls)
         }}]);
-
         for (const parent_cls of onto_cls.parents) {
           if(connector.ontoname == "tribolium") {
             var parentdev = tmp[parent_cls.id]
           }
-            cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color: devStageColor[parentdev]}},
-                {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass"}}]);
+          parent_cls.color.then(data => {
+            cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:devStageColor[parentdev] /*data*/}},
+                {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass"}}])});
         }
         cy.layout({
             name: 'cose'
@@ -164,7 +170,6 @@ export default {
         };
     },
     components: {
-
     },
     methods: {
         preConfig(cytoscape) {
@@ -305,6 +310,7 @@ export default {
 
                                         if(connector.ontoname == "tribolium") {
                                           var devStage = await properties_cls.target.devStage
+                                          var colors = await loadedcolors
                                           if(!devStageColor[devStage]){
                                             devStageColor[devStage] = colors[0]
                                             var table = document.getElementById("legend");
@@ -332,13 +338,15 @@ export default {
                                         }else {
                                           await properties_cls.target.devStage
                                         }
+                                        var color2 = await properties_cls.color
                                         cy.add([{
                                            group: 'nodes',
                                            data: {
                                                id: properties_cls.target.id,
                                                label: properties_cls.target.label,
                                                object: properties_cls.target,
-                                               color: devStageColor[devStage]
+                                               color: color2
+                                               //color: devStageColor[devStage]
                                            }
                                         },
                                            {group: 'edges', data: {source: properties_cls.target.id, target: object.id, label: properties_cls.property.name}}]);
@@ -374,6 +382,7 @@ export default {
                                for (var children_cls of children) {
                                     if(connector.ontoname == "tribolium") {
                                       var devStage = await children_cls.devStage
+                                      var colors = await loadedcolors
                                       if(!devStageColor[devStage]){
                                         devStageColor[devStage] = colors[0]
                                         var table = document.getElementById("legend");
@@ -399,13 +408,15 @@ export default {
                                         colors.shift();
                                       }
                                   }
+                                  var color3 = await children_cls.color
                                    cy.add([{
                                        group: 'nodes',
                                        data: {
                                            id: children_cls.id,
                                            label: children_cls.label,
                                            object: children_cls,
-                                           color: devStageColor[devStage]
+                                           color: color3
+                                           //color: devStageColor[devStage]
                                        }
                                    },
                                        {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a"}}]);
@@ -440,6 +451,7 @@ export default {
                                 for(var parent_cls of parent) {
                                  if(connector.ontoname == "tribolium") {
                                     var devStage = await parent_cls.devStage
+                                    var colors = await loadedcolors
                                     if(!devStageColor[devStage]){
                                       devStageColor[devStage] = colors[0]
 
@@ -466,13 +478,15 @@ export default {
                                       colors.shift();
                                     }
                                   }
+                                  var color4 = await parent_cls.color
                                      cy.add([{
                                          group: 'nodes',
                                          data: {
                                              id: parent_cls.id,
                                              label: parent_cls.label,
                                              object: parent_cls,
-                                             color: devStageColor[devStage]
+                                             color: color4
+                                             //color: devStageColor[devStage]
                                          }
                                      },
                                          {group: 'edges', data: {source: parent_cls.id, target: object.id, label: "subclass"}}]);
@@ -616,9 +630,7 @@ export default {
             }
 
 
-        },
-
+        }
     }
+}
 
-
-};

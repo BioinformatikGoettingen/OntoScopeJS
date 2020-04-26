@@ -2,6 +2,8 @@ export default class ontology_parser {
     //import the file from the url
     static async parse(path) {
         let {configuration} = await import(`${path}`);
+        console.log("configuration")
+        console.log(configuration)
         return configuration;   
     };
 
@@ -16,6 +18,5 @@ export default class ontology_parser {
     // create a script tag with functions
     create_script(path) {
     };
-
 
 }
