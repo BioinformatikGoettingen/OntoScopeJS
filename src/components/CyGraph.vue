@@ -18,6 +18,7 @@
           </div>
         </div>
         <table id = "legend"></table>
+        <div id = "historybox"><p style="margin:0">History:</p></div>
         <div id="myModal" class="modal">
             <div id = "modal-header">
                 <div id = "heading"> </div>

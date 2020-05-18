@@ -4,15 +4,17 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import OntoCls from './OntoCls'
 import GenericConnector from "./GenericConnector"
 import ontology_parser from "./ontology_parser"
+import History from "./History"
 
 
 let connector = new GenericConnector() //TODO make it dependent on the ontology
+let session_history = new History()
 
 var urlParams = new URLSearchParams(window.location.search);
 var configpath = urlParams.get("config")
 
-const loadedcolors = 
-import(`${configpath}`).then(function(configcallback){
+const loadedcolors = import(`${configpath}`)
+.then(function(configcallback){
   var triboliumtest = configcallback
   //console.log("configcallback:" + configcallback.configuration[0]['colors'])
   const loadedcolors = configcallback.configuration[0]['colors']
@@ -21,6 +23,7 @@ import(`${configpath}`).then(function(configcallback){
 })
 
 //const tribconnector = () => import(`${connectorpath}`)
+
 
 
 var devStageColor = []
@@ -141,24 +144,31 @@ async function add_data(onto_cls, cyInst) {
                 id: onto_cls.id,
                 label: onto_cls.label,
                 object: onto_cls,
-                color: color
-                //color: devStageColor[devStage]
+                //color: color
+                color: devStageColor[devStage]
         }}]);
         for (const parent_cls of onto_cls.parents) {
           if(connector.ontoname == "tribolium") {
             var parentdev = tmp[parent_cls.id]
           }
           parent_cls.color.then(data => {
-            cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:devStageColor[parentdev] /*data*/}},
-                {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass"}}])});
-        }
-        cy.layout({
-            name: 'cose'
-        }).run();
-    })
+            cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:/*data*/devStageColor[parentdev]}},
+                {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass"}}])
 
+                
+          }).then(data => {
+            cy.layout({
+              name: 'cose'
+            }).run();
+          }).then(data => {
+            session_history.add_to_list(cy,cy.json(),onto_cls.oc_label,"search")
+          })
+        }
+    })
+    
 
 }
+
 
 export default {
     name: "CyGraph",
@@ -305,7 +315,7 @@ export default {
                                   // hier dann node erstellen
                                   // HIER PROBLEM MIT nodes_of_type : WIRD ÜBERSCHRIEBEN! Hier muss nochmal ein array erstellt werden
                                 document.getElementById(type).onclick = async function() {
-                                    for (var properties_cls of properties) {
+                                  for (var properties_cls of properties) {
                                       if(properties_cls.property.name === this.id) {
 
                                         if(connector.ontoname == "tribolium") {
@@ -345,16 +355,17 @@ export default {
                                                id: properties_cls.target.id,
                                                label: properties_cls.target.label,
                                                object: properties_cls.target,
-                                               color: color2
-                                               //color: devStageColor[devStage]
+                                               //color: color2
+                                               color: devStageColor[devStage]
                                            }
                                         },
                                            {group: 'edges', data: {source: properties_cls.target.id, target: object.id, label: properties_cls.property.name}}]);
                                       }
-                                    }
-                                    cy.layout({
+                                  }
+                                  cy.layout({
                                         name: 'cose'
-                                    }).run()
+                                  }).run()
+                                  session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
                                   modal.style.display = "none";
                                   var elements = document.getElementsByClassName("listelement");
                                       while(elements.length > 0){
@@ -409,14 +420,14 @@ export default {
                                       }
                                   }
                                   var color3 = await children_cls.color
-                                   cy.add([{
+                                  cy.add([{
                                        group: 'nodes',
                                        data: {
                                            id: children_cls.id,
                                            label: children_cls.label,
                                            object: children_cls,
-                                           color: color3
-                                           //color: devStageColor[devStage]
+                                           //color: color3
+                                           color: devStageColor[devStage]
                                        }
                                    },
                                        {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a"}}]);
@@ -424,6 +435,7 @@ export default {
                                cy.layout({
                                    name: 'cose'
                                }).run()
+                               session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
                                modal.style.display = "none";
                                var elements = document.getElementsByClassName("listelement");
                                    while(elements.length > 0){
@@ -485,15 +497,19 @@ export default {
                                              id: parent_cls.id,
                                              label: parent_cls.label,
                                              object: parent_cls,
-                                             color: color4
-                                             //color: devStageColor[devStage]
+                                             //color: color4
+                                             color: devStageColor[devStage]
                                          }
                                      },
                                          {group: 'edges', data: {source: parent_cls.id, target: object.id, label: "subclass"}}]);
                                        }
+
                                  cy.layout({
                                      name: 'cose'
                                  }).run()
+                                  session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
+
+
                                  modal.style.display = "none";
                                  var elements = document.getElementsByClassName("listelement");
                                      while(elements.length > 0){
@@ -521,6 +537,7 @@ export default {
                             }
                           }
                         }
+
                       }
                     },
                     {
@@ -528,8 +545,10 @@ export default {
                       fillColor: 'red',
                       select: function (tmp) {
                         tmp.remove()
+                        session_history.add_to_list(cy,cy.json(),tmp.json().data.object.oc_label,"delete")
+
                       }
-                    }
+                    },
                 ]
             });
 

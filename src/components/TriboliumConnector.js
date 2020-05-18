@@ -21,7 +21,7 @@ const listofcolors = ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40
 //function will take the node and the current color definitons and look if devstage has been definded, 
 // if not it will take a color from a predefined listofcolors[] and expand the colors[] list
 export default async function get_color_of_node(node,colors) {
-    var devStage = await node.devStage;
+    /*var devStage = await node.devStage;
 
     if(!colors[devStage]){
         colors[devStage] = listofcolors[0]
@@ -29,7 +29,8 @@ export default async function get_color_of_node(node,colors) {
     }
 
     console.log("hier get color of node")
-    return colors[devStage]
+    return colors[devStage]*/
+    return "red"
 }
 
 //needen i.e. for the legend
