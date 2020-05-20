@@ -5,10 +5,12 @@ import OntoCls from './OntoCls'
 import GenericConnector from "./GenericConnector"
 import ontology_parser from "./ontology_parser"
 import History from "./History"
+//import Legend from "./Legend"
 
 
 let connector = new GenericConnector() //TODO make it dependent on the ontology
 let session_history = new History()
+//let session_legend = new Legend()
 
 var urlParams = new URLSearchParams(window.location.search);
 var configpath = urlParams.get("config")
@@ -649,6 +651,20 @@ export default {
             }
 
 
+        },
+        createpng() {
+          var cyInst = this.$cytoscape.instance;
+          cyInst.then(cy => {
+            var png64 = cy.png()
+            var imagebox = document.getElementById("imagebox")
+            imagebox.style.display = "block"
+            var close = imagebox.getElementsByClassName("close")[0]
+            document.getElementById('png-image').setAttribute('src',png64)
+            close.onclick = function() {
+              imagebox.style.display = "none"
+            }
+          })
+          
         }
     }
 }

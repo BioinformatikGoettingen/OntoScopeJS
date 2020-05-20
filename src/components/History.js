@@ -1,5 +1,3 @@
-import VueCyObj from './cy-object';
-
 export default class History {
     constructor() {
         this.historylist = []
@@ -7,7 +5,6 @@ export default class History {
       
     }
     get list() {
-       // for(i = 0; i < this.historylist.length; i ++) {}
         return this.historylist;
     }
     set list(json) {

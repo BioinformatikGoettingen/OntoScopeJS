@@ -10,6 +10,7 @@
          />
          <input id="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
          <button id="searchClassButton" v-on:click="search_for_class(searchTerm)" ref="mybutton">Search</button>
+
         </div>
         <div id = "infopanel">
           <b> Profile </b>
@@ -19,6 +20,7 @@
         </div>
         <table id = "legend"></table>
         <div id = "historybox"><p style="margin:0">History:</p></div>
+
         <div id="myModal" class="modal">
             <div id = "modal-header">
                 <div id = "heading"> </div>
@@ -27,6 +29,14 @@
              </div>
             <div id ="modal-content" class="modal-content"></div>
         </div>
+        <div id = "imagebox">
+            <img id = "png-image">
+             <span class="close">&times;</span>  
+
+        </div>
+    <button id="PngButton" v-on:click="createpng()" ref="mybutton">Create PNG</button>
+
+
     </div>
 </template>
 
