@@ -5,30 +5,34 @@ import OntoCls from './OntoCls'
 import GenericConnector from "./GenericConnector"
 import ontology_parser from "./ontology_parser"
 import History from "./History"
-//import Legend from "./Legend"
+import Legend from "./Legend"
+// npm install dom-to-image
+import domtoimage from "dom-to-image"
+
 
 
 let connector = new GenericConnector() //TODO make it dependent on the ontology
 let session_history = new History()
-//let session_legend = new Legend()
+let session_legend = new Legend()
 
 var urlParams = new URLSearchParams(window.location.search);
 var configpath = urlParams.get("config")
 
 const loadedcolors = import(`${configpath}`)
 .then(function(configcallback){
-  var triboliumtest = configcallback
-  //console.log("configcallback:" + configcallback.configuration[0]['colors'])
-  const loadedcolors = configcallback.configuration[0]['colors']
-
+  //console.log(configcallback.configuration[0]['colors'])
+//  var nodecolors = configcallback.configuration[0]['colors']["nodecolors"]
+ // var edgecolors = configcallback.configuration[0]['colors']["edgecolors"]
+  var loadedcolors = configcallback.configuration[0]["colors"]
+  //return [nodecolors,edgecolors]
   return loadedcolors
 })
 
 //const tribconnector = () => import(`${connectorpath}`)
 
 
-
-var devStageColor = []
+var nodeColor = []
+var edgeColor = []
 
 //var colors = ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"]
 
@@ -48,7 +52,10 @@ const config = {
         {
             selector: "edge",
             style: {
-                'curve-style': 'straight',
+                'curve-style': 'bezier',
+                "control-point-step-size":5,
+                "line-color": "data(color)",
+                "target-arrow-color":"data(color)",
                 width: 0.5,
                 'target-arrow-shape': 'triangle',
                 label: "data(label)",
@@ -71,71 +78,31 @@ const config = {
 
 async function add_data(onto_cls, cyInst) {
     console.log(onto_cls)
-      var devStage = await onto_cls.devStage
+    var devStage = await onto_cls.devStage
+    var colors = await loadedcolors
+    
+    session_legend.add_node_to_legend(devStage,colors['nodecolors'][0])
+    if(!nodeColor[devStage]){
+      nodeColor[devStage] = colors['nodecolors'][0]
+      colors['nodecolors'].shift();
+    }
+
+    var tmp = [] ;
+    var parent = await onto_cls.parents;
+    console.log(onto_cls.parents)
+    
+    for (const parent_cls of onto_cls.parents) {
+
+      //parent_cls.fillCls()
+      var devStageParent =  await parent_cls.devStage;
       var colors = await loadedcolors
-      
-      if(!devStageColor[devStage]){
-        devStageColor[devStage] = colors[0]
-
-        var table = document.getElementById("legend");
-        var tr = document.createElement("tr");
-        var tddot = document.createElement("td");
-        var tddesc = document.createElement("td");
-
-        var tddotnode = document.createElement("span");
-        tddotnode.className += "dot"
-        tddotnode.style.backgroundColor = colors[0]
-        //tddotnode.style.backgroundColor = get_color_of_node(tddotnode);
-        var tddescnode = document.createTextNode(devStage)
-
-        tddot.appendChild(tddotnode);
-        tddesc.appendChild(tddescnode);
-
-        tr.appendChild(tddot);
-        tr.appendChild(tddesc);
-
-        table.appendChild(tr)
-        table.style.display = "block"
-
-        colors.shift();
+      tmp[parent_cls.id] = devStageParent;
+      session_legend.add_node_to_legend(devStage,colors['nodecolors'][0])
+      if(!nodeColor[devStageParent]){
+        nodeColor[devStageParent] = colors['nodecolors'][0]
+        colors['nodecolors'].shift();
       }
-
-      var tmp = [] ;
-      var parent = await onto_cls.parents;
-      console.log(onto_cls.parents)
-      
-      for (const parent_cls of onto_cls.parents) {
-
-        //parent_cls.fillCls()
-        var devStageParent =  await parent_cls.devStage;
-        var colors = await loadedcolors
-        tmp[parent_cls.id] = devStageParent;
-        if(!devStageColor[devStageParent]){
-          devStageColor[devStageParent] = colors[0]
-          var table = document.getElementById("legend");
-          var tr = document.createElement("tr");
-          var tddot = document.createElement("td");
-          var tddesc = document.createElement("td");
-
-          var tddotnode = document.createElement("span");
-          tddotnode.className += "dot"
-          tddotnode.style.backgroundColor = colors[0]
-
-
-          var tddescnode = document.createTextNode(devStageParent)
-
-          tddot.appendChild(tddotnode);
-          tddesc.appendChild(tddescnode);
-
-          tr.appendChild(tddot);
-          tr.appendChild(tddesc);
-
-          table.appendChild(tr)
-        table.style.display = "block"
-
-          colors.shift();
-        }
-      }
+    }
 
   await onto_cls.fillCls();
   var color = await onto_cls.color
@@ -147,15 +114,22 @@ async function add_data(onto_cls, cyInst) {
                 label: onto_cls.label,
                 object: onto_cls,
                 //color: color
-                color: devStageColor[devStage]
+                color: nodeColor[devStage]
         }}]);
         for (const parent_cls of onto_cls.parents) {
           if(connector.ontoname == "tribolium") {
             var parentdev = tmp[parent_cls.id]
           }
+          session_legend.add_edge_to_legend("subclass",colors['edgecolors'][0])
+
+          if(!edgeColor["subclass"]){
+            edgeColor["subclass"] = colors['edgecolors'][0]
+            colors['edgecolors'].shift();
+          }
+
           parent_cls.color.then(data => {
-            cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:/*data*/devStageColor[parentdev]}},
-                {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass"}}])
+            cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:/*data*/nodeColor[parentdev]}},
+                {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass",color:edgeColor["subclass"]}}])
 
                 
           }).then(data => {
@@ -319,38 +293,24 @@ export default {
                                 document.getElementById(type).onclick = async function() {
                                   for (var properties_cls of properties) {
                                       if(properties_cls.property.name === this.id) {
+                                        var colors = await loadedcolors
 
                                         if(connector.ontoname == "tribolium") {
                                           var devStage = await properties_cls.target.devStage
-                                          var colors = await loadedcolors
-                                          if(!devStageColor[devStage]){
-                                            devStageColor[devStage] = colors[0]
-                                            var table = document.getElementById("legend");
-                                            var tr = document.createElement("tr");
-                                            var tddot = document.createElement("td");
-                                            var tddesc = document.createElement("td");
-
-                                            var tddotnode = document.createElement("span");
-                                            tddotnode.className += "dot"
-                                            tddotnode.style.backgroundColor = colors[0]
-
-                                            var tddescnode = document.createTextNode(devStage)
-
-                                            tddot.appendChild(tddotnode);
-                                            tddesc.appendChild(tddescnode);
-
-                                            tr.appendChild(tddot);
-                                            tr.appendChild(tddesc);
-
-                                            table.appendChild(tr)
-                                            table.style.display = "block"
-
-                                            colors.shift();
+                                          session_legend.add_node_to_legend(devStage,colors['nodecolors'][0])
+                                          if(!nodeColor[devStage]){
+                                            nodeColor[devStage] = colors['nodecolors'][0]
+                                            colors['nodecolors'].shift();
                                           }
                                         }else {
                                           await properties_cls.target.devStage
                                         }
                                         var color2 = await properties_cls.color
+                                        session_legend.add_edge_to_legend(properties_cls.property.name,colors['edgecolors'][0])
+                                        if(!edgeColor[properties_cls.property.name]){
+                                          edgeColor[properties_cls.property.name] = colors['edgecolors'][0]
+                                          colors['edgecolors'].shift();
+                                        }
                                         cy.add([{
                                            group: 'nodes',
                                            data: {
@@ -358,24 +318,24 @@ export default {
                                                label: properties_cls.target.label,
                                                object: properties_cls.target,
                                                //color: color2
-                                               color: devStageColor[devStage]
+                                               color: nodeColor[devStage]
                                            }
                                         },
-                                           {group: 'edges', data: {source: properties_cls.target.id, target: object.id, label: properties_cls.property.name}}]);
+                                           {group: 'edges', data: {source: properties_cls.target.id, target: object.id, label: properties_cls.property.name,color:edgeColor[properties_cls.property.name]}}]);
                                       }
                                   }
                                   cy.layout({
-                                        name: 'cose'
+                                      name: 'cose'
                                   }).run()
                                   session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
                                   modal.style.display = "none";
                                   var elements = document.getElementsByClassName("listelement");
-                                      while(elements.length > 0){
-                                          elements[0].parentNode.removeChild(elements[0]);
-                                      }
-                                    }
+                                  while(elements.length > 0){
+                                      elements[0].parentNode.removeChild(elements[0]);
+                                  }
                                 }
                               }
+                            }
 
                           //children
                             if(children != null){
@@ -393,35 +353,24 @@ export default {
 
                            document.getElementById("children").onclick = async function() {
                                for (var children_cls of children) {
+                                var colors = await loadedcolors
                                     if(connector.ontoname == "tribolium") {
                                       var devStage = await children_cls.devStage
-                                      var colors = await loadedcolors
-                                      if(!devStageColor[devStage]){
-                                        devStageColor[devStage] = colors[0]
-                                        var table = document.getElementById("legend");
-                                        var tr = document.createElement("tr");
-                                        var tddot = document.createElement("td");
-                                        var tddesc = document.createElement("td");
-
-                                        var tddotnode = document.createElement("span");
-                                        tddotnode.className += "dot"
-                                        tddotnode.style.backgroundColor = colors[0]
-
-                                        var tddescnode = document.createTextNode(devStage)
-
-                                        tddot.appendChild(tddotnode);
-                                        tddesc.appendChild(tddescnode);
-
-                                        tr.appendChild(tddot);
-                                        tr.appendChild(tddesc);
-
-                                        table.appendChild(tr)
-                                        table.style.display = "block"
-
-                                        colors.shift();
+                                      
+                                      
+                                      session_legend.add_node_to_legend(devStage,colors['nodecolors'][0])
+                                      if(!nodeColor[devStage]){
+                                        nodeColor[devStage] = colors['nodecolors'][0]
+                                        colors['nodecolors'].shift();
                                       }
                                   }
                                   var color3 = await children_cls.color
+                                  session_legend.add_edge_to_legend("is a",colors['edgecolors'][0])
+                                  if(!edgeColor["is a"]){
+                                    edgeColor["is a"] = colors['edgecolors'][0]
+                                    colors['edgecolors'].shift();
+                                  }
+
                                   cy.add([{
                                        group: 'nodes',
                                        data: {
@@ -429,10 +378,10 @@ export default {
                                            label: children_cls.label,
                                            object: children_cls,
                                            //color: color3
-                                           color: devStageColor[devStage]
+                                           color: nodeColor[devStage]
                                        }
                                    },
-                                       {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a"}}]);
+                                       {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a",color:edgeColor["is a"]}}]);
                                }
                                cy.layout({
                                    name: 'cose'
@@ -463,36 +412,23 @@ export default {
 
                              document.getElementById("parent").onclick = async function() {
                                 for(var parent_cls of parent) {
+                                  var colors = await loadedcolors
+
                                  if(connector.ontoname == "tribolium") {
                                     var devStage = await parent_cls.devStage
-                                    var colors = await loadedcolors
-                                    if(!devStageColor[devStage]){
-                                      devStageColor[devStage] = colors[0]
-
-                                      var table = document.getElementById("legend");
-                                      var tr = document.createElement("tr");
-                                      var tddot = document.createElement("td");
-                                      var tddesc = document.createElement("td");
-
-                                      var tddotnode = document.createElement("span");
-                                      tddotnode.className += "dot"
-                                      tddotnode.style.backgroundColor = colors[0]
-
-                                      var tddescnode = document.createTextNode(devStage)
-
-                                      tddot.appendChild(tddotnode);
-                                      tddesc.appendChild(tddescnode);
-
-                                      tr.appendChild(tddot);
-                                      tr.appendChild(tddesc);
-
-                                      table.appendChild(tr)
-                                      table.style.display = "block"
-
-                                      colors.shift();
+                                    session_legend.add_node_to_legend(devStage,colors['nodecolors'][0])
+                                    if(!nodeColor[devStage]){
+                                      nodeColor[devStage] = colors['nodecolors'][0]
+                                      colors['nodecolors'].shift();
                                     }
                                   }
                                   var color4 = await parent_cls.color
+                                  
+                                  session_legend.add_edge_to_legend("subclass",colors['edgecolors'][0])
+                                  if(!edgeColor["subclass"]){
+                                    edgeColor["subclass"] = colors['edgecolors'][0]
+                                    colors['edgecolors'].shift();
+                                  }
                                      cy.add([{
                                          group: 'nodes',
                                          data: {
@@ -500,10 +436,10 @@ export default {
                                              label: parent_cls.label,
                                              object: parent_cls,
                                              //color: color4
-                                             color: devStageColor[devStage]
+                                             color: nodeColor[devStage]
                                          }
                                      },
-                                         {group: 'edges', data: {source: parent_cls.id, target: object.id, label: "subclass"}}]);
+                                         {group: 'edges', data: {source: parent_cls.id, target: object.id, label: "subclass",color:edgeColor["subclass"]}}]);
                                        }
 
                                  cy.layout({
@@ -655,14 +591,54 @@ export default {
         createpng() {
           var cyInst = this.$cytoscape.instance;
           cyInst.then(cy => {
-            var png64 = cy.png()
-            var imagebox = document.getElementById("imagebox")
-            imagebox.style.display = "block"
-            var close = imagebox.getElementsByClassName("close")[0]
-            document.getElementById('png-image').setAttribute('src',png64)
-            close.onclick = function() {
-              imagebox.style.display = "none"
-            }
+            var cytoscape_png = cy.png({"bg":"white"})
+    
+             var canvas = document.getElementById('canvas')
+             var context = canvas.getContext('2d');
+             
+             var legend = document.getElementById("legendfieldset")
+
+             var cytoscape_image = new Image()
+             cytoscape_image.src = cytoscape_png
+             cytoscape_image.onload = drawactualimage
+
+            var imagebox = document.getElementById('imagebox')
+
+             domtoimage.toPng(legend).then(function (dataUrl) {
+                 var legendimage = new Image();
+                 legendimage.src = dataUrl;
+                 legendimage.onload = drawactualimage
+             }).catch(function (error) {
+                 console.error('oops, something went wrong!', error);
+             });
+
+
+             function drawactualimage() {
+              if (canvas.height < this.height) {
+                canvas.height = this.height
+              }
+              if (canvas.width < this.width) {
+                canvas.width = this.width
+              }
+              
+              context.drawImage(this, 0, 0,this.width,this.height);
+              var graphimg = document.getElementById("graph-image")
+              graphimg.src = canvas.toDataURL("image/png")
+              imagebox.style.display = "block"
+
+              var downloadbutton = document.getElementById("imagedownload")
+              downloadbutton.href = canvas.toDataURL("image/png")
+             }
+
+             var close = imagebox.getElementsByClassName("close")[0];
+             close.onclick = function () {
+               imagebox.style.display = "none"
+             }
+
+             var downloadbutton = document.getElementById("imagedownload")
+             downloadbutton.onclick = function () {
+
+             }
           })
           
         }

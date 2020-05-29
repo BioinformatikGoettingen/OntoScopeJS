@@ -8,9 +8,25 @@
                 :afterCreated="afterCreated"
                 :debug="true"
          />
-         <input id="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
+        <div>
+         <fieldset class = "fieldset" id = "legendfieldset">
+             <legend>Legend</legend>
+             <table id = "nodetable">
+             </table>
+             <table id = "edgetable">
+             </table>
+         </fieldset>
+        </div>
+        <input id="searchClass" v-model="searchTerm" v-on:keyup.enter="search_for_class(searchTerm)"/>
          <button id="searchClassButton" v-on:click="search_for_class(searchTerm)" ref="mybutton">Search</button>
+        <div id ="historydiv">
+            <fieldset class="fieldset" id = "historyfieldset">
+                <legend>History</legend>
+                <div id = "historybox">
 
+                </div>
+            </fieldset>
+        </div>
         </div>
         <div id = "infopanel">
           <b> Profile </b>
@@ -18,9 +34,6 @@
 
           </div>
         </div>
-        <table id = "legend"></table>
-        <div id = "historybox"><p style="margin:0">History:</p></div>
-
         <div id="myModal" class="modal">
             <div id = "modal-header">
                 <div id = "heading"> </div>
@@ -30,12 +43,13 @@
             <div id ="modal-content" class="modal-content"></div>
         </div>
         <div id = "imagebox">
-            <img id = "png-image">
+            <canvas id = "canvas"> </canvas>
+            <img id = "graph-image" />
+            <a href = "" class = "button" id = "imagedownload" download> Download this image </a>
              <span class="close">&times;</span>  
 
         </div>
-    <button id="PngButton" v-on:click="createpng()" ref="mybutton">Create PNG</button>
-
+        <button id="PngButton" v-on:click="createpng()" ref="mybutton">Create PNG</button>
 
     </div>
 </template>
