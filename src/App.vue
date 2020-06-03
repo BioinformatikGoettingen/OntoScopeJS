@@ -11,6 +11,9 @@
 <script>
 
 import CyGraph from './components/CyGraph.vue'
+import PluginHandler from "./components/PluginHandler"
+
+var pluginhandler = new PluginHandler()
 
 export default {
   name: 'app',

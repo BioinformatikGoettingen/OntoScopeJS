@@ -8,12 +8,18 @@ import History from "./History"
 import Legend from "./Legend"
 // npm install dom-to-image
 import domtoimage from "dom-to-image"
+//import PluginHandler from "./PluginHandler"
+
+
 
 
 
 let connector = new GenericConnector() //TODO make it dependent on the ontology
 let session_history = new History()
 let session_legend = new Legend()
+//let session_pluginhandler = new PluginHandler()
+
+
 
 var urlParams = new URLSearchParams(window.location.search);
 var configpath = urlParams.get("config")

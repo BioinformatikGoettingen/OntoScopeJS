@@ -53,5 +53,4 @@
 
     </div>
 </template>
-
 <script type="text/javascript" src="./CyGraph.js"></script>

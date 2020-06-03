@@ -3,13 +3,17 @@ export class TriboliumConnector {
     constructor() {
         this.ontology = "tribolium";
         this.category = "Development Stage";
-        this.colors = ["red","blue"]   
+        this.colors = ["red","blue"]  
+        this.color = "green" 
     };
 
 
     get_all_colors() {
         return this.colors;
     };
+    get_color() {
+        return this.color
+    }
 }
 // import from config
 const url = "http://oba.sybig.de"
