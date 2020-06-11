@@ -27,3 +27,7 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### URL-Example
+
+http://localhost:8080/?ontology=tribolium&ontologypackage=./tribolium.conf
