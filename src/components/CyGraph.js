@@ -24,15 +24,19 @@ let session_legend = new Legend()
 var urlParams = new URLSearchParams(window.location.search);
 var configpath = urlParams.get("config")
 
-const loadedcolors = import(`${configpath}`)
+const loadedcolors = {
+  "nodecolors" : ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"],
+  "edgecolors" : ["#f98d06","#fdcd04","#f0ff00","f6c398","#DAF7A6","#581845"]
+}
+/*const loadedcolors = import(`${configpath}`)
 .then(function(configcallback){
-  //console.log(configcallback.configuration[0]['colors'])
-//  var nodecolors = configcallback.configuration[0]['colors']["nodecolors"]
+  console.log(configcallback.configuration[0]['colors'])
+ var loadedcolors = configcallback.configuration[0]['colors']["nodecolors"]
  // var edgecolors = configcallback.configuration[0]['colors']["edgecolors"]
-  var loadedcolors = configcallback.configuration[0]["colors"]
+  //var loadedcolors = configcallback.configuration[0]["colors"]
   //return [nodecolors,edgecolors]
   return loadedcolors
-})
+})*/
 
 //const tribconnector = () => import(`${connectorpath}`)
 
@@ -85,9 +89,11 @@ const config = {
 async function add_data(onto_cls, cyInst) {
     console.log(onto_cls)
     var devStage = await onto_cls.devStage
+    console.log("test")
     var colors = await loadedcolors
-    
+    console.log("nodeColor")
     session_legend.add_node_to_legend(devStage,colors['nodecolors'][0])
+
     if(!nodeColor[devStage]){
       nodeColor[devStage] = colors['nodecolors'][0]
       colors['nodecolors'].shift();
@@ -111,7 +117,7 @@ async function add_data(onto_cls, cyInst) {
     }
 
   await onto_cls.fillCls();
-  var color = await onto_cls.color
+  //var color = await onto_cls.color
 
     //first node plus parent added
   cyInst.then(cy => {
@@ -133,18 +139,18 @@ async function add_data(onto_cls, cyInst) {
             colors['edgecolors'].shift();
           }
 
-          parent_cls.color.then(data => {
+         
             cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:/*data*/nodeColor[parentdev]}},
                 {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass",color:edgeColor["subclass"]}}])
 
                 
-          }).then(data => {
+          
             cy.layout({
               name: 'cose'
             }).run();
-          }).then(data => {
+         
             session_history.add_to_list(cy,cy.json(),onto_cls.oc_label,"search")
-          })
+          
         }
     })
     
@@ -311,7 +317,7 @@ export default {
                                         }else {
                                           await properties_cls.target.devStage
                                         }
-                                        var color2 = await properties_cls.color
+                                        //var color2 = await properties_cls.color
                                         session_legend.add_edge_to_legend(properties_cls.property.name,colors['edgecolors'][0])
                                         if(!edgeColor[properties_cls.property.name]){
                                           edgeColor[properties_cls.property.name] = colors['edgecolors'][0]
@@ -370,7 +376,7 @@ export default {
                                         colors['nodecolors'].shift();
                                       }
                                   }
-                                  var color3 = await children_cls.color
+                                // var color3 = await children_cls.color
                                   session_legend.add_edge_to_legend("is a",colors['edgecolors'][0])
                                   if(!edgeColor["is a"]){
                                     edgeColor["is a"] = colors['edgecolors'][0]
@@ -428,7 +434,7 @@ export default {
                                       colors['nodecolors'].shift();
                                     }
                                   }
-                                  var color4 = await parent_cls.color
+                                 // var color4 = await parent_cls.color
                                   
                                   session_legend.add_edge_to_legend("subclass",colors['edgecolors'][0])
                                   if(!edgeColor["subclass"]){

@@ -85,7 +85,7 @@ export default class GenericConnector {
                 method: "get",
                 timeout: 8000
             });
-
+                
             return await response;
 
         } catch (err) {
