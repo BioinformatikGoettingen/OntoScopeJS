@@ -1,5 +1,5 @@
 export default class OntoCls {
-connector
+
 //triboliumConnector
     constructor(json, connector) {
         this.json = json;
@@ -101,7 +101,7 @@ connector
         })
     }
 
-    get config () {
+   /* get config () {
       console.log("hier get config")
       return this.load_config().then(data => {
         return data.configuration[0]['link']
@@ -132,7 +132,30 @@ connector
       var connectorpromise = await import(`${connectorpath.configuration[0]['link']}`)
       return connectorpromise
     }
+*/
+  get_color_cat() {
+    console.log("get colocat for" + this.id)
+    return this.connector.getColorCatOfCls(this).then(data => {
+      console.log(data)
+      console.log("data")
+      if(data == undefined) {
+        return "undefined"
+      }else {
+        return data
+      }
+    }) 
+  }
 
+  get_color() {
+    console.log("get color for: " + this.id)
+    return this.connector.get_node_color(this).then(data => {
+      if(data == undefined) {
+        return "undefined"
+      }else {
+        return data
+      }
+    })
+  }
     get devStage() {
       console.log("get devStage for " + this.connector)
 
