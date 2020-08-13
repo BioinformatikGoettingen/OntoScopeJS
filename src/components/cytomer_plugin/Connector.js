@@ -107,27 +107,28 @@ class Connector {
   async getColorCatOfCls(Cls) {
     try{
       var cls_id = Cls.id;
-      console.log(this.url + "/cytomer/" + this.SUB_RESOURCE  + 'systemsOf/' + cls_id)
-
-
+      var namespace = Cls.oc_namespace
+      console.log(this.url + "/cytomer/" + this.SUB_RESOURCE  + 'systemsOf/' + cls_id+"?ns=" + namespace)
+      console.log("get_color_data"+cls_id)
+      
       axios.defaults.headers = {
-        'Accept': 'application/json'
+        'accept': 'text/plain'
       };
       let response = await axios({
-          url: this.url + "/cytomer/" + this.SUB_RESOURCE  + 'systemsOf/' + cls_id,
+          url: this.url + "/cytomer/" + this.SUB_RESOURCE  + 'systemsOf/' + cls_id+"?ns=" + namespace,
           method: "get",
-          timeout: 8000
+          timeout: 8000,
+          headers: {
+            'accept': 'text/plain'
+          }
       });
       
-      await response
-      console.log("response")
+      
+      console.log("hier wichtige esponse")
       console.log(response)
+      return await response
 
-      for(var anno of response.data.annotations) {
-        if(anno.name === 'label') {
-          return anno.value
-        }
-      }
+      //console.log(response.data)
 
 
     } catch (err) {

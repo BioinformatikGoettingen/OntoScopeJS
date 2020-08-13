@@ -6,7 +6,6 @@ export class PluginHandler {
 
     async loadPluginfromConfig(pluginlink) {
         var loadedConnectorfromPlugin = import(`${pluginlink}`).then(function(callback){
-            var pathtoplugin = callback.configuration[0]["link"]
             var connector = new callback.Connector()
             return connector
 
@@ -18,6 +17,7 @@ export class PluginHandler {
     async loadConfigfromUrl() {
         var urlParams = new URLSearchParams(window.location.search);
         var configpath = urlParams.get("ontologypackage");
+        
         var PluginHandler = this
         var loadedConfig = import(`${configpath}`)
         .then(function(callback) {
@@ -29,6 +29,15 @@ export class PluginHandler {
         })
         await loadedConfig
        return loadedConfig
+    }
+
+    async loadGenericController() {
+        var loadedGenericConnector = import("./genericConnector.js").then(function(callback) {
+            var connector = new callback.genericConnector()
+            return connector
+        })
+        await loadedGenericConnector
+        return loadedGenericConnector
     }
 }
 

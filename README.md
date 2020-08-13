@@ -30,4 +30,4 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### URL-Example
 
-http://localhost:8080/?ontology=tribolium&ontologypackage=./tribolium.conf
+http://localhost:8080/?ontologypackage=./tribolium_plugin/tribolium.conf
