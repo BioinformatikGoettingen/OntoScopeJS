@@ -10,7 +10,7 @@ npm install
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Compiles and minifies for production <-to build for production
 ```
 npm run build
 ```
@@ -31,3 +31,8 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 ### URL-Example
 
 http://localhost:8080/?ontologypackage=./tribolium_plugin/tribolium.conf
+
+### URL-Example to use ontoscope without plugin
+
+http://localhost:8080/?ontology=http://oba.sybig.de/&ontologyname=TFClass-human
+
