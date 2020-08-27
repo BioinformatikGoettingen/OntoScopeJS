@@ -13,7 +13,7 @@ class Connector {
       this.node_color=[]
     };
 
-    async get_node_color(onto_cls){
+    async get_node_color(onto_cls, prev_conn = undefined){
       var color_cat = await this.getColorCatOfCls(onto_cls)
       if(color_cat in this.node_color) {
         return this.node_color[color_cat]
@@ -28,7 +28,7 @@ class Connector {
 
 
     //ordnet jeder edge art nach und nach eine Farbe zu
-    get_edge_color(edge_type) {
+    get_edge_color(edge_type, prev_conn = undefined) {
       if(edge_type in this.edge_color) {
         return this.edge_color[edge_type]
       }else {
@@ -38,73 +38,9 @@ class Connector {
       }
       
     }
-    async search_for_class(searchString) {
-      axios.defaults.headers = {
-          'Accept': 'application/json'
-      };
-
-      const response = await axios.get(this.url + "/cytomer/functions/basic/searchCls/" + searchString + "*")
-      //TODO if their is no result, repeat the search once with wildcard
-      let result_cls = []
-      var data = response.data.entities[0]
-      for (let jsonCls of response.data.entities) {
-          let cls = this.createNewOntoCs(jsonCls)
-          cls.fillWithTemplate(data)
-          result_cls.push(cls)
-      }
-      return result_cls
-  }
-  //returns the results in an array
-  async first_search(searchString) {
-      axios.defaults.headers = {
-          'Accept': 'application/json'
-      };
-      const response = await axios.get(this.url + "/cytomer/functions/basic/searchCls/" + searchString + "*")
-      let result_cls = []
-
-      for (let jsonCls of response.data.entities) {
-        var data = jsonCls;
-          let cls = this.createNewOntoCs(jsonCls)
-          //fill with template lite, das nur das label und den namen und die annotations übernimt, aber keine e
-          // eigene Anfrage an den Server stellt, somit sollte die Performance deutlich verbessert werden
-
-
-          //cls.fillCls()
-          result_cls.push(cls)
-      }
-      console.log(result_cls)
-      return result_cls
-  }
-
-  async get_cls_data(Cls) {
-      try {
-          var cls_id = Cls.id;
-          var namespace = Cls.oc_namespace
-          console.log("fetching " + cls_id)
-          console.log("namespace")
-          console.log(namespace)
-          axios.defaults.headers = {
-              'Accept': 'application/json'
-          };
-          console.log(this.url + "/cytomer/cls/" + cls_id + "?ns=" + namespace)
-          let response = await axios({
-              url: this.url + "/cytomer/cls/" + cls_id + "?ns=" + namespace, // add also (encoded) NS
-  
-              method: "get",
-              timeout: 8000
-          });
-
-          console.log("response")
-          console.log(response)
-          return await response
-
-      } catch (err) {
-          console.log(err)
-      }
-  }
 
   //this need to be defined for every connector
-  async getColorCatOfCls(Cls) {
+  async getColorCatOfCls(Cls, prev_conn = undefined) {
     try{
       var cls_id = Cls.id;
       var namespace = Cls.oc_namespace
@@ -135,12 +71,7 @@ class Connector {
       console.log(err)
     }
   }
-  
 
-  createNewOntoCs(json) {
-      let cls = new OntoCls(json, this)
-      return cls
-  }
 }
 
 const configuration = [

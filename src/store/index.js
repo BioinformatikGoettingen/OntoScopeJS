@@ -33,15 +33,14 @@ export default new Vuex.Store({
       if(!configpath && !(url_for_generic && name_for_generic)) {
         alert("U need to define a URL and the name for an ontlogy OR name a pluginpath")
         return null
+      } 
+      if(url_for_generic && name_for_generic){
+        var callback2 = await handler.loadGenericController()
+        commit("addConnector", callback2)
       }
       if(configpath) {
         var callback = await handler.loadConfigfromUrl()
         commit("addConnector", callback)
-      }
-      if(url_for_generic && name_for_generic){
-        var callback2 = await handler.loadGenericController()
-        commit("addConnector", callback2)
-        
       }
       return state.connectorArray
       

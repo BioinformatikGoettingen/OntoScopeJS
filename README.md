@@ -30,7 +30,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### URL-Example
 
-http://localhost:8080/?ontologypackage=./tribolium_plugin/tribolium.conf
+http://localhost:8080/?ontologypackage=./tribolium_plugin/tribolium.conf&ontology=http://oba.sybig.de/&ontologyname=TFClass-human
 
 ### URL-Example to use ontoscope without plugin
 

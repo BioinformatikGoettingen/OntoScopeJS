@@ -63,8 +63,6 @@ async function add_data(onto_cls, cyInst) {
       var parentColor = await parent_cls.get_color()
       tmp[parent_cls.id] = parentColor;
       
-      console.log(parentColor)
-      console.log("parentColor")
       session_legend.add_node_to_legend(color_cat,parentColor)
     
     }
@@ -83,10 +81,16 @@ async function add_data(onto_cls, cyInst) {
         }}]);
         for (const parent_cls of onto_cls.parents) {
           //vielleicht hier auch eher die onto_cls fragen
-          session_legend.add_edge_to_legend("subclass",store.state.connectorArray[0].get_edge_color("subclass"))
+          var genericCallback = store.state.connectorArray[0].get_edge_color("subclass")
+          var prev_callback = genericCallback
+          for(var i = 1; i < store.state.connectorArray.length; i++) {
+            var pluginCallback = store.state.connectorArray[i].get_edge_color("subclass",prev_callback)
+            var prev_callback = pluginCallback
+          }
+          session_legend.add_edge_to_legend("subclass",prev_callback)
 
-          cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:tmp[parent_cls.id]/*datanodeColor[parentdev]*/}},
-              {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass",color:/*edgeColor["subclass"]*/store.state.connectorArray[0].get_edge_color("subclass")}}])
+          cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:tmp[parent_cls.id]}},
+              {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass",color:prev_callback}}])
 
               
         
@@ -98,9 +102,6 @@ async function add_data(onto_cls, cyInst) {
           
         }
     })
-    console.log("connector")
-    console.log(onto_cls.connector)
-    
 
 }
 
@@ -117,12 +118,9 @@ export default {
   },
   methods: {
       preConfig(cytoscape) {
-      
-      //  store.dispatch("addGenericConnector")
         store.dispatch("loadConnector")
 
         cytoscape.use(cxtmenu);
-
 
       },
       afterCreated: function (cy) {
@@ -262,7 +260,14 @@ export default {
                                 var color_cat = await property_cls.target.get_color_cat()
                                 var propertyColor = await property_cls.target.get_color()
                                 session_legend.add_node_to_legend(color_cat,propertyColor)
-                                session_legend.add_edge_to_legend(property_cls.property.name,store.state.connectorArray[0].get_edge_color(properties_cls.property.name))
+
+                                var genericCallback = store.state.connectorArray[0].get_edge_color(properties_cls.property.name)
+                                var prev_callback = genericCallback
+                                for(var i = 1; i < store.state.connectorArray.length; i++) {
+                                  var pluginCallback = store.state.connectorArray[i].get_edge_color(properties_cls.property.name,prev_callback)
+                                  var prev_callback = pluginCallback
+                                }
+                                session_legend.add_edge_to_legend(property_cls.property.name,prev_callback)
                                 
                                 
                                     cy.add([{
@@ -272,10 +277,9 @@ export default {
                                             label: property_cls.target.label,
                                             object: property_cls.target,
                                             color: propertyColor
-                                            //color: nodeColor[devStage]
                                         }
                                     },
-                                        {group: 'edges', data: {source: property_cls.target.id, target: object.id, label: property_cls.property.name,color:/*edgeColor[properties_cls.property.name]*/store.state.connectorArray[0].get_edge_color(properties_cls.property.name)}}]);
+                                        {group: 'edges', data: {source: property_cls.target.id, target: object.id, label: property_cls.property.name,color:prev_callback}}]);
                                   
                               }
                               cy.layout({
@@ -311,7 +315,16 @@ export default {
                               var color_cat = await children_cls.get_color_cat()
                               var childenColor = await children_cls.get_color()
                               session_legend.add_node_to_legend(color_cat,childenColor)
-                              session_legend.add_edge_to_legend("is a",store.state.connectorArray[0].get_edge_color("is a"))
+
+                              var genericCallback = store.state.connectorArray[0].get_edge_color("is a")
+                              var prev_callback = genericCallback
+                              for(var i = 1; i < store.state.connectorArray.length; i++) {
+                                var pluginCallback = store.state.connectorArray[i].get_edge_color("is a",prev_callback)
+                                var prev_callback = pluginCallback
+                              }
+
+
+                              session_legend.add_edge_to_legend("is a",prev_callback)
                               
                               cy.add([{
                                     group: 'nodes',
@@ -323,7 +336,7 @@ export default {
                                         color: childenColor
                                     }
                                 },
-                                    {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a",color:/*edgeColor["is a"]*/store.state.connectorArray[0].get_edge_color("is a")}}]);
+                                    {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a",color:prev_callback}}]);
                             }
                             cy.layout({
                                 name: 'cose'
@@ -358,19 +371,26 @@ export default {
                               var color_cat = await parent_cls.get_color_cat()
                               var parentColor = await parent_cls.get_color()
                               session_legend.add_node_to_legend(color_cat,parentColor)
-                              session_legend.add_edge_to_legend("subclass",store.state.connector.get_edge_color("subclass"))
-                              
-                                  cy.add([{
-                                      group: 'nodes',
-                                      data: {
-                                          id: parent_cls.id,
-                                          label: parent_cls.label,
-                                          object: parent_cls,
-                                          color: parentColor
-                                      }
-                                  },
-                                      {group: 'edges', data: {source: parent_cls.id, target: object.id, label: "subclass",color:/*edgeColor["subclass"]*/store.state.connectorArray[0].get_edge_color("subclass")}}]);
-                                    }
+
+                              var genericCallback = store.state.connectorArray[0].get_edge_color("subclass")
+                              var prev_callback = genericCallback
+                              for(var i = 1; i < store.state.connectorArray.length; i++) {
+                                var pluginCallback = store.state.connectorArray[i].get_edge_color("subclass",prev_callback)
+                                var prev_callback = pluginCallback
+                              }
+
+                              session_legend.add_edge_to_legend("subclass",prev_callback)
+                              cy.add([{
+                                  group: 'nodes',
+                                  data: {
+                                      id: parent_cls.id,
+                                      label: parent_cls.label,
+                                      object: parent_cls,
+                                      color: parentColor
+                                  }
+                              },
+                                  {group: 'edges', data: {source: parent_cls.id, target: object.id, label: "subclass",color:prev_callback}}]);
+                                }
 
                               cy.layout({
                                   name: 'cose'
@@ -451,12 +471,10 @@ export default {
           cy.fit();
       },
       async search_for_class(searchString) {
-          
-        //var ontology = store.state.connector.ontoname
+        console.log("length")
+        console.log(store.state.connectorArray.length)
         var searchedResult = await store.state.connectorArray[0].first_search(searchString);
         var cytoscape = this.$cytoscape.instance;
-        console.log("connectorArray")
-        console.log(store.state.connectorArray)
         if(searchedResult.length == 1) {
 
           var cls = searchedResult[0]

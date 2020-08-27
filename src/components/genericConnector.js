@@ -1,5 +1,7 @@
 import axios from 'axios'
 import OntoCls from "./OntoCls";
+import store from "../store"
+
 class genericConnector {
 
     constructor() {
@@ -24,6 +26,7 @@ class genericConnector {
 
     //ordnet jeder edge art nach und nach eine Farbe zu
     get_edge_color(edge_type) {
+      console.log("hier get edge color; generic connector")
       if(edge_type in this.edge_color) {
         return this.edge_color[edge_type]
       }else {
@@ -103,8 +106,10 @@ class genericConnector {
   }
 
   createNewOntoCs(json) {
-      let cls = new OntoCls(json, this)
-      return cls
+    
+    //let cls = new OntoCls(json, this)
+    let cls = new OntoCls(json, store.state.connectorArray)
+    return cls
   }
 }
 
