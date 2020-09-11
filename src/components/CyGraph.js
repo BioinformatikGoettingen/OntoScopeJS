@@ -90,7 +90,7 @@ async function add_data(onto_cls, cyInst) {
           session_legend.add_edge_to_legend("subclass",prev_callback)
 
           cy.add([{group: 'nodes', data: {id: parent_cls.id, label: parent_cls.label, object: parent_cls,color:tmp[parent_cls.id]}},
-              {group: 'edges', data: {source: parent_cls.id, target: onto_cls.id, label: "subclass",color:prev_callback}}])
+              {group: 'edges', data: {id: parent_cls.id+"to"+onto_cls.id+"by"+"subclass",source: parent_cls.id, target: onto_cls.id, label: "subclass",color:prev_callback}}])
 
               
         
@@ -137,6 +137,7 @@ export default {
             var profile = document.getElementById("profile");
             var object = node.data.object;
             var json_object = await object.json;
+            console.log(json_object)
             var json_result = [];
             for(var i in json_object) {
               json_result.push([i,json_object[i]])
@@ -173,6 +174,17 @@ export default {
           menu = cy.cxtmenu({
               selector: 'node',
               commands: [
+                {
+                  content:"test",
+                  fillColor:"blue",
+                  select: async function (tmp) {
+                    var json = tmp.json();
+                    var data = json.data
+                    var object = data.object
+                    console.log("object")
+                    console.log(object)
+                  } 
+                },
                   {
                     content: "expand",
                     fillColor: 'green',
@@ -180,6 +192,8 @@ export default {
                         var json = tmp.json();
                         var data = json.data;
                         var object = data.object;
+                        console.log("object222")
+                        console.log(object)
                         var properties = await object.properties;
                         var children = await object.children;
                         var parent = await object.parents;
@@ -279,7 +293,7 @@ export default {
                                             color: propertyColor
                                         }
                                     },
-                                        {group: 'edges', data: {source: property_cls.target.id, target: object.id, label: property_cls.property.name,color:prev_callback}}]);
+                                        {group: 'edges', data: {id: property_cls.target.id+"to"+object.id+"by"+property_cls.property.name,source: property_cls.target.id, target: object.id, label: property_cls.property.name,color:prev_callback}}]);
                                   
                               }
                               cy.layout({
@@ -336,7 +350,7 @@ export default {
                                         color: childenColor
                                     }
                                 },
-                                    {group: 'edges', data: {source: children_cls.id, target: object.id, label: "is a",color:prev_callback}}]);
+                                    {group: 'edges', data: {id: children_cls.id+"to"+object.id+"by"+"is_a",source: children_cls.id, target: object.id, label: "is a",color:prev_callback}}]);
                             }
                             cy.layout({
                                 name: 'cose'
@@ -389,7 +403,7 @@ export default {
                                       color: parentColor
                                   }
                               },
-                                  {group: 'edges', data: {source: parent_cls.id, target: object.id, label: "subclass",color:prev_callback}}]);
+                                  {group: 'edges', data: {id:parent_cls.id+"to"+object.id+"by"+"subclass",source: parent_cls.id, target: object.id, label: "subclass",color:prev_callback}}]);
                                 }
 
                               cy.layout({

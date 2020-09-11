@@ -12,9 +12,12 @@ export default class OntoCls {
       if(annotation.name === 'label' && annotation.language === '') {
         tmp = true
         this.oc_label = annotation.value
+        console.log("this is gonna be used")
+        console.log(annotation)
       }
     }
     if(!tmp) {
+      console.log("or this gonna be used")
       this.oc_label = json.name
     }
     
@@ -79,12 +82,7 @@ export default class OntoCls {
 
   get label() {
     console.log("hier get label")
-    for (var anno of this.json.annotations) {
-      if (anno.name === 'label') {
-        return anno.value;
-      }
-    }
-    return this.json.name;
+    return this.oc_label
   }
 
   get name() {

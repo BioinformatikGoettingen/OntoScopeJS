@@ -90,15 +90,5 @@ export default class Legend {
                 
             }
         })
-
-       /* var tablerow = document.createElement("tr")
-        var dot = document.createElement("td")
-        var dotname = document.createElement("td")
-        
-        var dotnode = document.createElement("span")
-        dotnode.addclassName += "dot"
-        dotnode.style.backgroundColor = colors[0]*/
-
-
     }
 }

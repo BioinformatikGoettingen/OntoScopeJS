@@ -15,6 +15,8 @@ class Connector {
 
     async get_node_color(onto_cls, prev_conn = undefined){
       var color_cat = await this.getColorCatOfCls(onto_cls)
+
+    
       if(color_cat in this.node_color) {
         return this.node_color[color_cat]
       } else {
@@ -48,21 +50,22 @@ class Connector {
       console.log("get_color_data"+cls_id)
       
       axios.defaults.headers = {
-        'accept': 'text/plain'
+        'accept': 'application/json'
       };
       let response = await axios({
           url: this.url + "/cytomer/" + this.SUB_RESOURCE  + 'systemsOf/' + cls_id+"?ns=" + namespace,
           method: "get",
-          timeout: 8000,
-          headers: {
-            'accept': 'text/plain'
-          }
+          timeout: 4000
       });
       
-      
-      console.log("hier wichtige esponse")
+      console.log("hier wichtige response")
       console.log(response)
-      return await response
+      if(response === undefined || response.data == "") {
+        var color_cat = "undefined"
+      }else {
+        var color_cat = response.data.entities[0].name
+      }
+      return await color_cat
 
       //console.log(response.data)
 
