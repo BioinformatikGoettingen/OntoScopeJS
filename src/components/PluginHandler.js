@@ -16,7 +16,7 @@ export class PluginHandler {
 
     async loadConfigfromUrl() {
         var urlParams = new URLSearchParams(window.location.search);
-        var configpath = urlParams.get("ontologypackage");
+        var configpath = urlParams.get("plugin");
         
         var PluginHandler = this
         var loadedConfig = import(`${configpath}`)

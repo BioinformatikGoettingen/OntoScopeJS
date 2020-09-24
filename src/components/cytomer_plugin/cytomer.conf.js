@@ -1,6 +1,6 @@
 const configuration = [
   {
-    "url": "http://oba.sybig.de",
+    "url": "http://oba.sybig.de/cytomer",
     "link": "./cytomer_plugin/Connector.js",
     "predefinitions" : {
       "#001f3f" : "undefinded",

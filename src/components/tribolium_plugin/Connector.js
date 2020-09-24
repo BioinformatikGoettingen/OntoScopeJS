@@ -3,10 +3,8 @@ import OntoCls from "../OntoCls";
 class Connector {
 
   constructor() {
-    this.ontoname = "tribolium";
-    //this.category = "Development Stage";
-    this.url = "http://oba.sybig.de"
-    this.SUB_RESOURCE = "functions/tribolium/";
+    this.url = "http://oba.sybig.de/tribolium"
+    this.SUB_RESOURCE = "/functions/tribolium/";
     this.edgecolorpool =["#f98d06","#fdcd04","#f0ff00","f6c398","#DAF7A6","#581845"]  
     this.nodecolorpool = ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"]
     this.edge_color =[]
@@ -45,16 +43,16 @@ class Connector {
   async getColorCatOfCls(Cls, prev_conn = undefined) {
     try{
       var cls_id = Cls.id;
-      console.log(this.url + "/tribolium/" + this.SUB_RESOURCE  + 'devStageOfCls/' + cls_id)
+      console.log(this.url + this.SUB_RESOURCE  + 'devStageOfCls/' + cls_id)
 
 
       axios.defaults.headers = {
         'Accept': 'application/json'
       };
       let response = await axios({
-          url: this.url + "/tribolium/" + this.SUB_RESOURCE  + 'devStageOfCls/' + cls_id,
+          url: this.url + this.SUB_RESOURCE  + 'devStageOfCls/' + cls_id,
           method: "get",
-          timeout: 8000
+          timeout: 4000
       });
       
       await response
@@ -75,7 +73,7 @@ class Connector {
 
 const configuration = [
     {
-      "url": "http://oba.sybig.de",
+      "url": "http://oba.sybig.de/tribolium",
       "link": "./Connector.js",
       "predefinitions" : {
         "#001f3f" : "undefinded",
