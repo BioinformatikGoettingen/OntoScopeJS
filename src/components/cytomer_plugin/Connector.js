@@ -47,7 +47,7 @@ class Connector {
       var cls_id = Cls.id;
       var namespace = Cls.oc_namespace
       console.log(this.url + "/cytomer/" + this.SUB_RESOURCE  + 'systemsOf/' + cls_id+"?ns=" + namespace)
-      console.log("get_color_data"+cls_id)
+      //console.log("get_color_data"+cls_id)
       
       axios.defaults.headers = {
         'accept': 'application/json'
@@ -58,8 +58,8 @@ class Connector {
           timeout: 4000
       });
       
-      console.log("hier wichtige response")
-      console.log(response)
+      //console.log("hier wichtige response")
+      //console.log(response)
       if(response === undefined || response.data == "") {
         var color_cat = "undefined"
       }else {

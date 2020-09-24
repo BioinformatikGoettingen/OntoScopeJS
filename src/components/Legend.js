@@ -36,7 +36,7 @@ export default class Legend {
         var nodelist = this.nodelist        
 
         Object.keys(this.nodelist).forEach(function(key) {
-            console.log(key + nodelist[key])
+            ////console.log(key + nodelist[key])
             if(!document.getElementById("nodelegend:" + key)) {
                 var tablerow = document.createElement("tr")
                 var dot = document.createElement("td")
@@ -65,7 +65,7 @@ export default class Legend {
         var edgelist = this.edgelist
 
         Object.keys(this.edgelist).forEach(function(key) {
-            console.log(key + edgelist[key])
+            //console.log(key + edgelist[key])
             if(!document.getElementById("edgelegend:" + key)) {
                 var tablerow = document.createElement("tr")
                 var dot = document.createElement("td")

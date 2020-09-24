@@ -26,7 +26,7 @@ class genericConnector {
 
     //ordnet jeder edge art nach und nach eine Farbe zu
     get_edge_color(edge_type) {
-      console.log("hier get edge color; generic connector")
+      //console.log("hier get edge color; generic connector")
       if(edge_type in this.edge_color) {
         return this.edge_color[edge_type]
       }else {
@@ -70,7 +70,7 @@ class genericConnector {
           //cls.fillCls()
           result_cls.push(cls)
       }
-      console.log(result_cls)
+      //console.log(result_cls)
       return result_cls
   }
 
@@ -78,9 +78,9 @@ class genericConnector {
       try {
           var cls_id = Cls.id;
           var namespace = Cls.oc_namespace
-          console.log("fetching " + cls_id)
-          console.log("namespace")
-          console.log(namespace)
+          //console.log("fetching " + cls_id)
+          //console.log("namespace")
+          //console.log(namespace)
           axios.defaults.headers = {
               'Accept': 'application/json'
           };
@@ -89,11 +89,11 @@ class genericConnector {
               url: this.url + "/"+this.ontoname+"/cls/" + cls_id + "?ns=" + namespace, // add also (encoded) NS
   
               method: "get",
-              timeout: 8000
+              timeout: 4000
           });
 
-          console.log("response")
-          console.log(response)
+          //console.log("response")
+          //console.log(response)
           return await response
 
       } catch (err) {
