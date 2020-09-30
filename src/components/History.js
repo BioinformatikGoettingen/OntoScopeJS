@@ -65,14 +65,23 @@ export default class History {
 
     //check for greyed DOM-elements and delete them, also in the historylist
     delete_previous() {
+        // delete searchtip
+        var first_searchtip = document.getElementById("first_searchtip")
+        var urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get("defaultNode")) {
+            if(first_searchtip && this.historylist.length > 0) {
+                first_searchtip.parentNode.removeChild(first_searchtip)
+            }
+        }else {
+            if(first_searchtip) {
+                first_searchtip.parentNode.removeChild(first_searchtip)
+            }
+        }
 
         var greyed = document.getElementsByClassName("greyed")
-        
         while(greyed.length > 0){
-
             var deleteelement = document.getElementById(greyed[0].id)
             deleteelement.parentNode.removeChild(deleteelement)
-
             this.historylist.pop()
         }
     }

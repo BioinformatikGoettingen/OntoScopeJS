@@ -38,7 +38,7 @@ class genericConnector {
         'Accept': 'application/json'
     };
 
-    const response = await axios.get(this.url + "/functions/basic/searchCls/" + searchString + "*")
+    const response = await axios.get(this.url + "/functions/basic/searchCls/" + searchString)
     //TODO if their is no result, repeat the search once with wildcard
     let result_cls = []
     var data = response.data.entities[0]
@@ -54,7 +54,9 @@ class genericConnector {
       axios.defaults.headers = {
           'Accept': 'application/json'
       };
-      const response = await axios.get(this.url +"/functions/basic/searchCls/" + searchString + "*")
+      const response = await axios.get(this.url +"/functions/basic/searchCls/" + searchString)
+      console.log(this.url +"/functions/basic/searchCls/" + searchString + "*")
+      console.log(response)
       let result_cls = []
 
       for (let jsonCls of response.data.entities) {

@@ -7,7 +7,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-      count: 0,
+      configArray: [],
       connectorArray : []
   },
   mutations: {
@@ -17,7 +17,12 @@ export default new Vuex.Store({
   
       addConnector(state, connector) {
         state.connectorArray.push(connector)
-      }
+      },
+
+      addconfig(state, config) {
+        state.configArray.push(config)
+      } 
+
   },
   actions: {
     incrementAsync ({ commit }) {
@@ -30,8 +35,6 @@ export default new Vuex.Store({
       var plugin = urlParams.get("plugin");
       var url = urlParams.get("url")
 
-      //var url_for_generic = urlParams.get("ontology")
-      //var name_for_generic = urlParams.get("ontologyname")
       if(!plugin && !url) {
         alert("U need to define a URL and the name for an ontlogy OR name a pluginpath")
         return null
@@ -39,16 +42,15 @@ export default new Vuex.Store({
       
 
       //load generic Connector
-      
       var callback2 = await handler.loadGenericController()
       commit("addConnector", callback2)
     
       //load pluginConnector and overwrite url in genericConnector
       if(plugin) {
-        var callback = await handler.loadConfigfromUrl()
+        var callback = await handler.loadPluginfromUrl()
         commit("addConnector", callback)
-        console.log(state.connectorArray[0].url)
-        console.log(state.connectorArray[state.connectorArray.length - 1].url)
+        var config = await handler.loadConfigfromPlugin()
+        commit("addconfig", config)
         state.connectorArray[0].url = state.connectorArray[state.connectorArray.length - 1].url
         if(url) {
           for(var i = 0; i < state.connectorArray.length; i++){
@@ -57,6 +59,9 @@ export default new Vuex.Store({
         }
       }
 
+      // add searchtip to searchbox
+      var searchbox = document.getElementById("searchClass")
+      searchbox.placeholder = state.configArray[0][0].searchtip
       return state.connectorArray
       
     },
@@ -66,7 +71,6 @@ export default new Vuex.Store({
       commit("addConnector", callback)
       return state.connectorArray
     }
-    
   },
   modules: {
   }

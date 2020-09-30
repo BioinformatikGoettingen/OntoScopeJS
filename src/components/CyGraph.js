@@ -118,491 +118,526 @@ export default {
   },
   methods: {
     preConfig(cytoscape) {
-      store.dispatch("loadConnector")
-
+      var cy = this
+      store.dispatch("loadConnector").then(function(test) {
+        cy.load_class_from_url()
+      })
+      
       cytoscape.use(cxtmenu);
-
     },
     afterCreated: function (cy) {
-        let menu;
-        ////console.log(cy);
-        let menu2 = this.$refs.menu;
-        cy.on('tap', 'node', async function (event) {
-          //delete existing elements
-          var elements = document.getElementsByClassName("infopanelelement");
-          while(elements.length > 0){
-              elements[0].parentNode.removeChild(elements[0]);
-          }
-          var node = event.target.json();
-          var profile = document.getElementById("profile");
-          var object = node.data.object;
-          var json_object = await object.json;
-          //console.log(json_object)
-          var json_result = [];
-          for(var i in json_object) {
-            json_result.push([i,json_object[i]])
-          }
-          var profile = document.getElementById("profile");
+    let menu;
+    let menu2 = this.$refs.menu;
+    cy.on('tap', 'node', async function (event) {
+      //delete existing elements
+      var elements = document.getElementsByClassName("infopanelelement");
+      while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+      }
+      var node = event.target.json();
+      var profile = document.getElementById("profile");
+      var object = node.data.object;
+      var json_object = await object.json;
+      //console.log(json_object)
+      var json_result = [];
+      for(var i in json_object) {
+        json_result.push([i,json_object[i]])
+      }
+      var profile = document.getElementById("profile");
 
-          for(var i = 1; i < json_result.length; i++) {
-            if(json_result[i][0] == 'annotations') {
-              //console.log(json_result)
-              var innerArrayLength = json_result[i][1].length;
-              for (var j = 0; j < innerArrayLength; j++) {
-                var temp = json_result[i][1][j];
-                if(!(temp.value === "")){
-                  var header = document.createElement('p');
-                  header.className += 'header infopanelelement';
-                  if(!(temp.language === "")) {
-                    var headernode = document.createTextNode(temp.name + "(" + temp.language + ")");
-                  }else {
-                    var headernode = document.createTextNode(temp.name);
-                  }
-                  header.appendChild(headernode);
-                  profile.appendChild(header);
-                  var text = document.createElement('p');
-                  text.className += 'text infopanelelement';
-                  var textnode = document.createTextNode(temp.value);
-                  text.appendChild(textnode);
-                  profile.appendChild(text);
-                }
+      for(var i = 1; i < json_result.length; i++) {
+        if(json_result[i][0] == 'annotations') {
+          //console.log(json_result)
+          var innerArrayLength = json_result[i][1].length;
+          for (var j = 0; j < innerArrayLength; j++) {
+            var temp = json_result[i][1][j];
+            if(!(temp.value === "")){
+              var header = document.createElement('p');
+              header.className += 'header infopanelelement';
+              if(!(temp.language === "")) {
+                var headernode = document.createTextNode(temp.name + "(" + temp.language + ")");
+              }else {
+                var headernode = document.createTextNode(temp.name);
               }
+              header.appendChild(headernode);
+              profile.appendChild(header);
+              var text = document.createElement('p');
+              text.className += 'text infopanelelement';
+              var textnode = document.createTextNode(temp.value);
+              text.appendChild(textnode);
+              profile.appendChild(text);
             }
           }
-        });
-        //if nodes need different context menue, we need to create a cy.cxtmenu for each type of node
-        menu = cy.cxtmenu({
-            selector: 'node',
-            commands: [
-              {
-                  content: "expand",
-                  fillColor: 'green',
-                  select: async function (tmp) {
-                      var json = tmp.json();
-                      var data = json.data;
-                      var object = data.object;
-                      //console.log("TIMESTAMP 1")
-                      var properties = await object.properties;
-                      //console.log("TIMESTAMP 2")
-                      var children = await object.children;
-                      //console.log("TIMESTAMP 3")
-                      var parent = await object.parents;
-                      //console.log("TIMESTAMP 4")
+        }
+      }
+    });
+    //if nodes need different context menue, we need to create a cy.cxtmenu for each type of node
+    menu = cy.cxtmenu({
+        selector: 'node',
+        commands: [
+          {
+              content: "expand",
+              fillColor: 'green',
+              select: async function (tmp) {
+                  var json = tmp.json();
+                  var data = json.data;
+                  var object = data.object;
+                  //console.log("TIMESTAMP 1")
+                  var properties = await object.properties;
+                  //console.log("TIMESTAMP 2")
+                  var children = await object.children;
+                  //console.log("TIMESTAMP 3")
+                  var parent = await object.parents;
+                  //console.log("TIMESTAMP 4")
 
-                      var modal = document.getElementById("myModal");
-                      var heading = document.getElementById("heading");
-                      heading.innerHTML =  "Expand the Graph";
-                      var subtitle = document.getElementById("subtitle");
-                      subtitle.innerHTML = "Please select the relation to be added to the graph";
-                      
-                      //check if expand menu is needed
-                      var children_exist = true;
-                      var parent_exist = true;
-                      var properties_exist = true;
+                  var modal = document.getElementById("myModal");
+                  var heading = document.getElementById("heading");
+                  heading.innerHTML =  "Expand the Graph";
+                  var subtitle = document.getElementById("subtitle");
+                  subtitle.innerHTML = "Please select the relation to be added to the graph";
+                  
+                  //check if expand menu is needed
+                  var children_exist = true;
+                  var parent_exist = true;
+                  var properties_exist = true;
 
-                      if(children ==  null){
-                        children_exist = false
-                      }else if (children.length == 0 ){
-                        children_exist = false
-                      }
-                      if(parent ==  null){
-                        parent_exist = false
-                      }else if (parent.length == 0 ){
-                        parent_exist = false
-                      }
-                      if(properties ==  null){
-                        properties_exist = false
-                      }else if (properties.length == 0 ){
-                        properties_exist = false
-                      }
-                      if(!children_exist && !parent_exist && !properties_exist) {
-                        alert("nothing to expand")
-                      }
+                  if(children ==  null){
+                    children_exist = false
+                  }else if (children.length == 0 ){
+                    children_exist = false
+                  }
+                  if(parent ==  null){
+                    parent_exist = false
+                  }else if (parent.length == 0 ){
+                    parent_exist = false
+                  }
+                  if(properties ==  null){
+                    properties_exist = false
+                  }else if (properties.length == 0 ){
+                    properties_exist = false
+                  }
+                  if(!children_exist && !parent_exist && !properties_exist) {
+                    alert("nothing to expand")
+                  }
 
-                      if(children == null && parent == null && !properties) {
-                        alert("no children, parents or properties to display")
-                      }else {
-                        var propertytype = []
-                        //properties
-                        if(properties != null){
+                  if(children == null && parent == null && !properties) {
+                    alert("no children, parents or properties to display")
+                  }else {
+                    var propertytype = []
+                    //properties
+                    if(properties != null){
 
-                          for (var properties_cls of properties) {
-                            //create a array with all types of
-                            if(!propertytype.includes(properties_cls.property.name)){
-                              propertytype.push(properties_cls.property.name)
-                            }
-                          }
-
-                          for( var type of propertytype){
-                            //load all nodes of certain type
-                            var nodes_of_type = []
-                            for(var prop  of properties){
-                              if(prop.property.name === type){
-                                nodes_of_type.push(prop)
-                                //nodes_of_type.push(prop.target)
-                              }
-                            }
-
-                            
-                            modal.style.display = "block";
-                            var span = document.getElementsByClassName("close")[0];
-                            var string = "load "+ type + "(" + nodes_of_type.length + ")";
-                            var node = document.createElement("div");
-                            var textnode = document.createTextNode(string);
-                            node.id = type
-                            node.className += "listelement"
-                            node.appendChild(textnode);
-                            document.getElementById("modal-content").appendChild(node);
-
-                            // hier dann node erstellen
-                            // HIER PROBLEM MIT nodes_of_type : WIRD ÜBERSCHRIEBEN! Hier muss nochmal ein array erstellt werden
-                          document.getElementById(type).onclick = async function() {
-                            for (var property_cls of properties) {
-                              //console.log("TIMESTAMP 6")
-
-                              //console.log("property_cls")
-                              //console.log(property_cls)
-                              await property_cls.target.fillCls()
-
-                              var color_cat = await property_cls.target.get_color_cat()
-                              //console.log("hier wird eine colorcat getladen")
-                              var propertyColor = await property_cls.target.get_color()
-                              session_legend.add_node_to_legend(color_cat,propertyColor)
-
-                              var genericCallback = store.state.connectorArray[0].get_edge_color(properties_cls.property.name)
-                              var prev_callback = genericCallback
-                              for(var i = 1; i < store.state.connectorArray.length; i++) {
-                                var pluginCallback = store.state.connectorArray[i].get_edge_color(properties_cls.property.name,prev_callback)
-                                var prev_callback = pluginCallback
-                              }
-                              session_legend.add_edge_to_legend(property_cls.property.name,prev_callback)
-                              //console.log("TIMESTAMP 7")
-                              cy.add([{
-                                  group: 'nodes',
-                                  data: {
-                                      id: property_cls.target.id,
-                                      label: property_cls.target.label,
-                                      object: property_cls.target,
-                                      color: propertyColor
-                                  }
-                              },
-                                  {group: 'edges', data: {id: property_cls.target.id+"to"+object.id+"by"+property_cls.property.name,source: property_cls.target.id, target: object.id, label: property_cls.property.name,color:prev_callback}}]);
-                                  cy.layout({
-                                    name: 'cose'
-                                }).run()
-                            }
-                            
-                            session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
-                            modal.style.display = "none";
-                            var elements = document.getElementsByClassName("listelement");
-                            while(elements.length > 0){
-                                elements[0].parentNode.removeChild(elements[0]);
-                            }
-                          }
+                      for (var properties_cls of properties) {
+                        //create a array with all types of
+                        if(!propertytype.includes(properties_cls.property.name)){
+                          propertytype.push(properties_cls.property.name)
                         }
                       }
 
-                    //children
-                      if(children != null){
-                        if(children.length > 0) {
-                        var modal = document.getElementById("myModal");
+                      for(var type of propertytype){
+                        //load all nodes of certain type
+                        var nodes_of_type = []
+                        for(var prop  of properties){
+                          if(prop.property.name === type){
+                            nodes_of_type.push(prop)
+                            //nodes_of_type.push(prop.target)
+                          }
+                        }
+
+                        console.log(type)
+                        console.log(nodes_of_type)
+
                         modal.style.display = "block";
                         var span = document.getElementsByClassName("close")[0];
-                          var string = "load children (" + children.length + ")";
-                          var node = document.createElement("div");
-                          var textnode = document.createTextNode(string);
-                          node.id = "children"
-                          node.className += "listelement"
-                          node.appendChild(textnode);
-                          document.getElementById("modal-content").appendChild(node);
+                        var string = "load "+ type + "(" + nodes_of_type.length + ")";
+                        var node = document.createElement("div");
+                        var textnode = document.createTextNode(string);
+                        node.id = type
+                        node.className += "listelement"
+                        node.appendChild(textnode);
+                        document.getElementById("modal-content").appendChild(node);
 
-                      document.getElementById("children").onclick = async function() {
-                        for (var children_cls of children) {
-                            await children_cls.fillCls()
-                            var color_cat = await children_cls.get_color_cat()
-                            var childenColor = await children_cls.get_color()
-                            session_legend.add_node_to_legend(color_cat,childenColor)
-
-                            var genericCallback = store.state.connectorArray[0].get_edge_color("is a")
-                            var prev_callback = genericCallback
-                            for(var i = 1; i < store.state.connectorArray.length; i++) {
-                              var pluginCallback = store.state.connectorArray[i].get_edge_color("is a",prev_callback)
-                              var prev_callback = pluginCallback
+                        // hier dann node erstellen
+                        // HIER PROBLEM MIT nodes_of_type : WIRD ÜBERSCHRIEBEN! Hier muss nochmal ein array erstellt werden
+                        document.getElementById(type).onclick = async function(tmp) {
+                          var selectednodes = []
+                          for(var prop  of properties){
+                            if(prop.property.name === tmp.target.id){
+                              selectednodes.push(prop)
                             }
-
-
-                            session_legend.add_edge_to_legend("is a",prev_callback)
-                            
-                            cy.add([{
-                                  group: 'nodes',
-                                  data: {
-                                      id: children_cls.id,
-                                      label: children_cls.label,
-                                      object: children_cls,
-                                      //color: color3
-                                      color: childenColor
-                                  }
-                              },
-                                  {group: 'edges', data: {id: children_cls.id+"to"+object.id+"by"+"is_a",source: children_cls.id, target: object.id, label: "is a",color:prev_callback}}]);
                           }
-                          cy.layout({
-                              name: 'cose'
-                          }).run()
-                          session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
-                          modal.style.display = "none";
-                          var elements = document.getElementsByClassName("listelement");
-                              while(elements.length > 0){
-                                  elements[0].parentNode.removeChild(elements[0]);
-                              }
+                          for (var property_cls of selectednodes) {
+                            
+                            await property_cls.target.fillCls()
 
-                      }
-                        }
-                      }
-                      //parent
-                      if(parent != null) {
-                        if(parent.length > 0 ) {
-                          var modal = document.getElementById("myModal");
-                          modal.style.display = "block";
-                          var span = document.getElementsByClassName("close")[0];
-                            var string = "load parent (" + parent.length + ")";
-                            var node = document.createElement("div");
-                            var textnode = document.createTextNode(string);
-                            node.id = "parent"
-                            node.className += "listelement"
-                            node.appendChild(textnode);
-                            document.getElementById("modal-content").appendChild(node);
+                            var color_cat = await property_cls.target.get_color_cat()
+                            //console.log("hier wird eine colorcat getladen")
+                            var propertyColor = await property_cls.target.get_color()
+                            session_legend.add_node_to_legend(color_cat,propertyColor)
 
-                        document.getElementById("parent").onclick = async function() {
-                          for(var parent_cls of parent) {
-                            await parent_cls.fillCls()
-                            var color_cat = await parent_cls.get_color_cat()
-                            var parentColor = await parent_cls.get_color()
-                            session_legend.add_node_to_legend(color_cat,parentColor)
-
-                            var genericCallback = store.state.connectorArray[0].get_edge_color("subclass")
+                            var genericCallback = store.state.connectorArray[0].get_edge_color(tmp.target.id)
                             var prev_callback = genericCallback
                             for(var i = 1; i < store.state.connectorArray.length; i++) {
-                              var pluginCallback = store.state.connectorArray[i].get_edge_color("subclass",prev_callback)
+                              var pluginCallback = store.state.connectorArray[i].get_edge_color(tmp.target.id,prev_callback)
                               var prev_callback = pluginCallback
                             }
-
-                            session_legend.add_edge_to_legend("subclass",prev_callback)
+                            session_legend.add_edge_to_legend(tmp.target.id,prev_callback)
+                            //console.log("TIMESTAMP 7")
+                            console.log(property_cls)
                             cy.add([{
                                 group: 'nodes',
                                 data: {
-                                    id: parent_cls.id,
-                                    label: parent_cls.label,
-                                    object: parent_cls,
-                                    color: parentColor
+                                    id: property_cls.target.id,
+                                    label: property_cls.target.label,
+                                    object: property_cls.target,
+                                    color: propertyColor
                                 }
                             },
-                                {group: 'edges', data: {id:parent_cls.id+"to"+object.id+"by"+"subclass",source: parent_cls.id, target: object.id, label: "subclass",color:prev_callback}}]);
-                              }
-
-                            cy.layout({
-                                name: 'cose'
-                            }).run()
-                            session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
-
-
-                            modal.style.display = "none";
-                            var elements = document.getElementsByClassName("listelement");
-                                while(elements.length > 0){
-                                    elements[0].parentNode.removeChild(elements[0]);
-                                }
-                      }
+                                {group: 'edges', data: {id: property_cls.target.id+"to"+object.id+"by"+tmp.target.id,source: property_cls.target.id, target: object.id, label: tmp.target.id,color:prev_callback}}]);
+                                cy.layout({
+                                  name: 'cose'
+                              }).run()
                         }
-
-                      span.onclick = function() {
-                          modal.style.display = "none";
-                          var elements = document.getElementsByClassName("listelement");
-                              while(elements.length > 0){
-                                  elements[0].parentNode.removeChild(elements[0]);
-                              }
-                      }
-                      window.onclick = function(event) {
-                          if (event.target == modal) {
-                              modal.style.display = "none";
-                              var elements = document.getElementsByClassName("listelement");
-                                  while(elements.length > 0){
-                                      elements[0].parentNode.removeChild(elements[0]);
-                                  }
-
-                          }
+                        
+                        session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
+                        modal.style.display = "none";
+                        var elements = document.getElementsByClassName("listelement");
+                        while(elements.length > 0){
+                            elements[0].parentNode.removeChild(elements[0]);
+                        }
                       }
                     }
                   }
 
+                //children
+                if(children != null){
+                  if(children.length > 0) {
+                  var modal = document.getElementById("myModal");
+                  modal.style.display = "block";
+                  var span = document.getElementsByClassName("close")[0];
+                    var string = "load children (" + children.length + ")";
+                    var node = document.createElement("div");
+                    var textnode = document.createTextNode(string);
+                    node.id = "children"
+                    node.className += "listelement"
+                    node.appendChild(textnode);
+                    document.getElementById("modal-content").appendChild(node);
+
+                document.getElementById("children").onclick = async function() {
+                  for (var children_cls of children) {
+                      await children_cls.fillCls()
+                      var color_cat = await children_cls.get_color_cat()
+                      var childenColor = await children_cls.get_color()
+                      session_legend.add_node_to_legend(color_cat,childenColor)
+
+                      var genericCallback = store.state.connectorArray[0].get_edge_color("is a")
+                      var prev_callback = genericCallback
+                      for(var i = 1; i < store.state.connectorArray.length; i++) {
+                        var pluginCallback = store.state.connectorArray[i].get_edge_color("is a",prev_callback)
+                        var prev_callback = pluginCallback
+                      }
+
+
+                      session_legend.add_edge_to_legend("is a",prev_callback)
+                      
+                      cy.add([{
+                            group: 'nodes',
+                            data: {
+                                id: children_cls.id,
+                                label: children_cls.label,
+                                object: children_cls,
+                                //color: color3
+                                color: childenColor
+                            }
+                        },
+                            {group: 'edges', data: {id: children_cls.id+"to"+object.id+"by"+"is_a",source: children_cls.id, target: object.id, label: "is a",color:prev_callback}}]);
+                            cy.layout({
+                              name: 'cose'
+                          }).run()
+                    }
+                    
+                    session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
+                    modal.style.display = "none";
+                    var elements = document.getElementsByClassName("listelement");
+                        while(elements.length > 0){
+                            elements[0].parentNode.removeChild(elements[0]);
+                        }
+
                 }
-              },
-              {
-                content: 'delete node',
-                fillColor: 'red',
-                select: function (tmp) {
+                  }
+                }
+                  //parent
+                if(parent != null) {
+                    if(parent.length > 0 ) {
+                      var modal = document.getElementById("myModal");
+                      modal.style.display = "block";
+                      var span = document.getElementsByClassName("close")[0];
+                        var string = "load parent (" + parent.length + ")";
+                        var node = document.createElement("div");
+                        var textnode = document.createTextNode(string);
+                        node.id = "parent"
+                        node.className += "listelement"
+                        node.appendChild(textnode);
+                        document.getElementById("modal-content").appendChild(node);
+
+                    document.getElementById("parent").onclick = async function() {
+                      for(var parent_cls of parent) {
+                        await parent_cls.fillCls()
+                        var color_cat = await parent_cls.get_color_cat()
+                        var parentColor = await parent_cls.get_color()
+                        session_legend.add_node_to_legend(color_cat,parentColor)
+
+                        var genericCallback = store.state.connectorArray[0].get_edge_color("subclass")
+                        var prev_callback = genericCallback
+                        for(var i = 1; i < store.state.connectorArray.length; i++) {
+                          var pluginCallback = store.state.connectorArray[i].get_edge_color("subclass",prev_callback)
+                          var prev_callback = pluginCallback
+                        }
+
+                        session_legend.add_edge_to_legend("subclass",prev_callback)
+                        cy.add([{
+                            group: 'nodes',
+                            data: {
+                                id: parent_cls.id,
+                                label: parent_cls.label,
+                                object: parent_cls,
+                                color: parentColor
+                            }
+                        },
+                            {group: 'edges', data: {id:parent_cls.id+"to"+object.id+"by"+"subclass",source: parent_cls.id, target: object.id, label: "subclass",color:prev_callback}}]);
+                            cy.layout({
+                              name: 'cose'
+                            }).run()
+                          }
+
+                        
+                        session_history.add_to_list(cy,cy.json(),object.oc_label,"add")
+
+
+                        modal.style.display = "none";
+                        var elements = document.getElementsByClassName("listelement");
+                            while(elements.length > 0){
+                                elements[0].parentNode.removeChild(elements[0]);
+                            }
+                  }
+                    }
+
+                  span.onclick = function() {
+                      modal.style.display = "none";
+                      var elements = document.getElementsByClassName("listelement");
+                          while(elements.length > 0){
+                              elements[0].parentNode.removeChild(elements[0]);
+                          }
+                  }
+                  window.onclick = function(event) {
+                      if (event.target == modal) {
+                          modal.style.display = "none";
+                          var elements = document.getElementsByClassName("listelement");
+                              while(elements.length > 0){
+                                  elements[0].parentNode.removeChild(elements[0]);
+                              }
+
+                      }
+                  }
+                }
+              }
+
+            }
+          },
+          {
+            content: 'delete node',
+            fillColor: 'red',
+            select: function (tmp) {
+              if(cy.$(':selected').length  > 1) {
+                cy.$(':selected').remove()
+                tmp.remove()
+                session_history.add_to_list(cy,cy.json(),"multiple deletion","delete")
+              } else if(cy.$(':selected').length  == 1) {
+                if (tmp.json().data.object.id == cy.$(":selected").json().data.object.id) {
                   tmp.remove()
                   session_history.add_to_list(cy,cy.json(),tmp.json().data.object.oc_label,"delete")
-
+                } else {
+                  cy.$(':selected').remove()
+                  tmp.remove()
+                  session_history.add_to_list(cy,cy.json(),"multiple deletion","delete")
                 }
-              },
-            ]
-        });
+              } else {
+                tmp.remove()
+                session_history.add_to_list(cy,cy.json(),tmp.json().data.object.oc_label,"delete")
+              }
 
-        this.setCyElements(cy);
-        // the default values of each option are outlined below:
-
-    },
-      cyKey() {
-          //console.log("-------- cyKey");
-          const that = this;
-          CyObj.reset();
-          CyObj.instance.then(cy => {
-              //console.log('cy', cy);
-              cy.on('tap', event => {
-                  //console.log('tapped');
-                  that.i++
-              })
-          });
-          //console.log('computing cyKey cy' + this.i);
-          return 'cy' + this.i
-      },
-      setCyElements(cy) {
-          //console.log("setCyElements");
-          let cytoElems = [
-          ];
-          cy.startBatch();
-          cy.elements().remove();
-          for (let el of cytoElems) {
-              cy.add(el);
-          }
-          cy.endBatch();
-          cy.fit();
-      },
-      async search_for_class(searchString) {
-        //console.log("length")
-        //console.log(store.state.connectorArray.length)
-        var searchedResult = await store.state.connectorArray[0].first_search(searchString);
-        var cytoscape = this.$cytoscape.instance;
-        if(searchedResult.length == 1) {
-
-          var cls = searchedResult[0]
-          cls.fillCls();
-          add_data(cls, cytoscape)
-
-        }else {
-
-          var modal = document.getElementById("myModal");
-          modal.style.display = "block";
-          var span = document.getElementsByClassName("close")[0];
-          var heading = document.getElementById("heading");
-          heading.innerHTML =  "SearchResult";
-          var subtitle = document.getElementById("subtitle");
-          subtitle.innerHTML = "Please select one ontology class to add to the graph";
-          
-          for(var i = 0; i< searchedResult.length; i++){
-
-            var string = searchedResult[i].label;
-            var node = document.createElement("div");
-            var textnode2 = document.createTextNode(string);
-            node.classList.add("selection");
-            node.id = searchedResult[i].id
-            node.appendChild(textnode2);
-            document.getElementById("modal-content").appendChild(node);
-
-          }
-
-          var elements = document.querySelectorAll(".selection");
-          for (var i = 0; i < elements.length; i++) {
-            elements[i].onclick = async function() {
-              var id = await event.srcElement.id
-              var cls = searchedResult.find(function(element) {
-                return element.oc_name == id
-              })
               
-              cls.fillCls();
-              add_data(cls, cytoscape)
-              modal.style.display = "none";
-              var elements = document.getElementsByClassName("selection");
-                  while(elements.length > 0){
-                      elements[0].parentNode.removeChild(elements[0]);
-                  }
+              
+
             }
-          }
+          },
+        ]
+    });
+
+    this.setCyElements(cy);
+    // the default values of each option are outlined below:
+    },
+    cyKey() {
+        //console.log("-------- cyKey");
+        const that = this;
+        CyObj.reset();
+        CyObj.instance.then(cy => {
+            //console.log('cy', cy);
+            cy.on('tap', event => {
+                //console.log('tapped');
+                that.i++
+            })
+        });
+        //console.log('computing cyKey cy' + this.i);
+        return 'cy' + this.i
+    },
+    setCyElements(cy) {
+        //console.log("setCyElements");
+        let cytoElems = [
+        ];
+        
+        cy.startBatch();
+        cy.elements().remove();
+        for (let el of cytoElems) {
+            cy.add(el);
+        }
+        cy.endBatch();
+        cy.fit();
+    },
+    async search_for_class(searchString) {
+      var searchedResult = await store.state.connectorArray[0].first_search(searchString);
+      var cytoscape = this.$cytoscape.instance;
+      if(searchedResult.length == 1) {
+
+        var cls = searchedResult[0]
+        cls.fillCls();
+        add_data(cls, cytoscape)
+
+      }else {
+
+        var modal = document.getElementById("myModal");
+        modal.style.display = "block";
+        var span = document.getElementsByClassName("close")[0];
+        var heading = document.getElementById("heading");
+        heading.innerHTML =  "SearchResult";
+        var subtitle = document.getElementById("subtitle");
+        subtitle.innerHTML = "Please select one ontology class to add to the graph";
+        
+        for(var i = 0; i< searchedResult.length; i++){
+
+          var string = searchedResult[i].label;
+          var node = document.createElement("div");
+          var textnode2 = document.createTextNode(string);
+          node.classList.add("selection");
+          node.id = searchedResult[i].id
+          node.appendChild(textnode2);
+          document.getElementById("modal-content").appendChild(node);
+
         }
 
-
-        span.onclick = function() {
+        var elements = document.querySelectorAll(".selection");
+        for (var i = 0; i < elements.length; i++) {
+          elements[i].onclick = async function() {
+            var id = await event.srcElement.id
+            var cls = searchedResult.find(function(element) {
+              return element.oc_name == id
+            })
+            
+            cls.fillCls();
+            add_data(cls, cytoscape)
             modal.style.display = "none";
             var elements = document.getElementsByClassName("selection");
                 while(elements.length > 0){
                     elements[0].parentNode.removeChild(elements[0]);
                 }
+          }
         }
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-                var elements = document.getElementsByClassName("selection");
-                    while(elements.length > 0){
-                        elements[0].parentNode.removeChild(elements[0]);
-                    }
-            }
-        }
-      },
-
-      createpng() {
-
-        var cyInst = this.$cytoscape.instance;
-        cyInst.then(cy => {
-          var cytoscape_png = cy.png({"bg":"white"})
-  
-            var canvas = document.getElementById('canvas')
-            var context = canvas.getContext('2d');
-            
-            var legend = document.getElementById("legendfieldset")
-
-            var cytoscape_image = new Image()
-            cytoscape_image.src = cytoscape_png
-            cytoscape_image.onload = drawactualimage
-
-          var imagebox = document.getElementById('imagebox')
-
-            domtoimage.toPng(legend).then(function (dataUrl) {
-                var legendimage = new Image();
-                legendimage.src = dataUrl;
-                legendimage.onload = drawactualimage
-            }).catch(function (error) {
-                console.error('oops, something went wrong!', error);
-            });
-
-
-            function drawactualimage() {
-            if (canvas.height < this.height) {
-              canvas.height = this.height
-            }
-            if (canvas.width < this.width) {
-              canvas.width = this.width
-            }
-            
-            context.drawImage(this, 0, 0,this.width,this.height);
-            var graphimg = document.getElementById("graph-image")
-            graphimg.src = canvas.toDataURL("image/png")
-            imagebox.style.display = "block"
-
-            var downloadbutton = document.getElementById("imagedownload")
-            downloadbutton.href = canvas.toDataURL("image/png")
-            }
-
-            var close = imagebox.getElementsByClassName("close")[0];
-            close.onclick = function () {
-              imagebox.style.display = "none"
-            }
-
-            var downloadbutton = document.getElementById("imagedownload")
-            downloadbutton.onclick = function () {
-
-            }
-        })
-        
       }
+
+
+      span.onclick = function() {
+          modal.style.display = "none";
+          var elements = document.getElementsByClassName("selection");
+              while(elements.length > 0){
+                  elements[0].parentNode.removeChild(elements[0]);
+              }
+      }
+      window.onclick = function(event) {
+          if (event.target == modal) {
+              modal.style.display = "none";
+              var elements = document.getElementsByClassName("selection");
+                  while(elements.length > 0){
+                      elements[0].parentNode.removeChild(elements[0]);
+                  }
+          }
+      }
+    },
+    async load_class_from_url() {
+
+      var urlParams = new URLSearchParams(window.location.search);
+      var searchString = urlParams.get("defaultNode")
+
+      var searchedResult = await store.state.connectorArray[0].first_search(searchString);
+      var cytoscape = this.$cytoscape.instance;
+      var cls = searchedResult[0]
+      cls.fillCls();
+      add_data(cls, cytoscape)
+    },
+    createpng() {
+
+      var cyInst = this.$cytoscape.instance;
+      cyInst.then(cy => {
+        var cytoscape_png = cy.png({"bg":"white"})
+
+          var canvas = document.getElementById('canvas')
+          var context = canvas.getContext('2d');
+          
+          var legend = document.getElementById("legendfieldset")
+
+          var cytoscape_image = new Image()
+          cytoscape_image.src = cytoscape_png
+          cytoscape_image.onload = drawactualimage
+
+        var imagebox = document.getElementById('imagebox')
+
+          domtoimage.toPng(legend).then(function (dataUrl) {
+              var legendimage = new Image();
+              legendimage.src = dataUrl;
+              legendimage.onload = drawactualimage
+          }).catch(function (error) {
+              console.error('oops, something went wrong!', error);
+          });
+
+
+          function drawactualimage() {
+          if (canvas.height < this.height) {
+            canvas.height = this.height
+          }
+          if (canvas.width < this.width) {
+            canvas.width = this.width
+          }
+          
+          context.drawImage(this, 0, 0,this.width,this.height);
+          var graphimg = document.getElementById("graph-image")
+          graphimg.src = canvas.toDataURL("image/png")
+          imagebox.style.display = "block"
+
+          var downloadbutton = document.getElementById("imagedownload")
+          downloadbutton.href = canvas.toDataURL("image/png")
+          }
+
+          var close = imagebox.getElementsByClassName("close")[0];
+          close.onclick = function () {
+            imagebox.style.display = "none"
+          }
+
+          var downloadbutton = document.getElementById("imagedownload")
+          downloadbutton.onclick = function () {
+
+          }
+      })
+      
+    }
   }
 }
 

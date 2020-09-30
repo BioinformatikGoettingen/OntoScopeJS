@@ -30,7 +30,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### URL-Example with plugin
 
-http://localhost:8080/?plugin=./cytomer_plugin/cytomer.conf
+http://localhost:8080/?plugin=./cytomer_plugin
 
 ### URL-Example to use ontoscope without plugin
 
@@ -38,4 +38,8 @@ http://localhost:8080/?url=http://oba.sybig.de/cytomer
 
 ### You can also use a plugin for a different ontology
 
-http://localhost:8080/?plugin=./cytomer_plugin/cytomer.conf&url=http://oba.sybig.de/tribolium
+http://localhost:8080/?plugin=./cytomer_plugin&url=http://oba.sybig.de/tribolium
+
+### You are able to set a default node in the URL by the name of the node, the first node from the search will be displayed
+
+http://localhost:8080/?plugin=./cytomer_plugin&defaultNode=head

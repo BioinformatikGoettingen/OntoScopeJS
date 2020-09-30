@@ -23,6 +23,7 @@
             <fieldset class="fieldset" id = "historyfieldset">
                 <legend>History</legend>
                 <div id = "historybox">
+                    <div id= "first_searchtip">Tip: Search for a term in the searchbox and select a result to draw the first node. </div>
 
                 </div>
             </fieldset>

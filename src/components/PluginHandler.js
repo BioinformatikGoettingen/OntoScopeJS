@@ -1,36 +1,39 @@
 export class PluginHandler {
 
     constructor() {
-        this.loadConfigfromUrl()
+        this.loadPluginfromUrl()
     }
 
-    async loadPluginfromConfig(pluginlink) {
-        var loadedConnectorfromPlugin = import(`${pluginlink}`).then(function(callback){
+    async loadPluginfromUrl() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var pluginpath = urlParams.get("plugin");
+        pluginpath = pluginpath + "/Connector.js"
+        
+        var PluginHandler = this
+        var loadedPlugin = import(`${pluginpath}`).then(function(callback){
             var connector = new callback.Connector()
             return connector
 
         })
-        await loadedConnectorfromPlugin
-        return loadedConnectorfromPlugin
+        await loadedPlugin
+        return loadedPlugin
     }
 
-    async loadConfigfromUrl() {
+    async loadConfigfromPlugin() {
         var urlParams = new URLSearchParams(window.location.search);
-        var configpath = urlParams.get("plugin");
+        var pluginpath = urlParams.get("plugin");
+        pluginpath = pluginpath + "/Connector.js"
         
         var PluginHandler = this
-        var loadedConfig = import(`${configpath}`)
-        .then(function(callback) {
-            var pathtoplugin = callback.configuration[0]["link"]
-            var Plugin = PluginHandler.loadPluginfromConfig(pathtoplugin).then(function(callback) {
-                return callback
-            }) 
-            return Plugin
-        })
-        await loadedConfig
-       return loadedConfig
-    }
+        var loadedconfig = import(`${pluginpath}`).then(function(callback){
+            var config = callback.configuration
+            return config
 
+        })
+        await loadedconfig
+        return loadedconfig
+
+    }
     async loadGenericController() {
         var loadedGenericConnector = import("./genericConnector.js").then(function(callback) {
             var connector = new callback.genericConnector()

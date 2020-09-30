@@ -5,7 +5,7 @@ class Connector {
     constructor() {
       this.url = "http://oba.sybig.de/cytomer"
       this.SUB_RESOURCE = "/functions/cytomer/";
-      this.edgecolorpool =["#f98d06","#fdcd04","#f0ff00","f6c398","#DAF7A6","#581845"]  
+      this.edgecolorpool =["#f98d06","#fdcd04","#f0ff00","#f6c398","#DAF7A6","#581845"]  
       this.nodecolorpool = ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"]
       this.edge_color =[]
       this.node_color=[]
@@ -75,18 +75,9 @@ class Connector {
 }
 
 const configuration = [
-    {
-      "url": "http://oba.sybig.de/cytomer",
-      "link": "./Connector.js",
-      "predefinitions" : {
-        "#001f3f" : "undefinded",
-        "#0074D9" : "adult"
-      },
-      "colors" : {
-        "nodecolors" : ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"],
-        "edgecolors" : ["#f98d06","#fdcd04","#f0ff00","f6c398","#DAF7A6","#581845"]
-      }
-    }
-  ]
+  {
+    "searchtip": "i.e. search for leg"
+  }
+]
 
-export {configuration, Connector} 
+export {Connector, configuration} 
