@@ -1,10 +1,6 @@
 <template>
   <div id="app">
-
-    OntoScope
-
     <CyGraph />
-
   </div>
 </template>
 
@@ -12,15 +8,14 @@
 
 import CyGraph from './components/CyGraph.vue'
 import Vue from 'vue'
-
-
+ 
 
 
 export default {
   name: 'app',
  
   components: {
-    "CyGraph" : CyGraph,
+    CyGraph
   }
 }
 
@@ -36,6 +31,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   /*text-align: center;*/
   color: #2c3e50;
-  margin-top: 60px;
+  
 }
 </style>

@@ -19,10 +19,10 @@ export default class History {
         this.historylist.push([action,json])
 
         var element = document.createElement("button")
-        element.className = "historybutton"
+        element.className = "btn btn-primary historybutton"
+        element.style.margin =" 3px 3px"
         element.id = this.historylist.length - 1
       
-
         if(action == "undefined"){
             var value = node_name 
         }else if(action == "search"){
@@ -34,7 +34,7 @@ export default class History {
         }
         
         element.innerHTML = element.value =value
-        
+
         // import the json into the graph and grey all following history
         element.onclick = function() {
             cy.json(json)
@@ -48,12 +48,15 @@ export default class History {
             for(var i = 0; i <= clickedId; i++){
                 var ungreyelement = document.getElementById(i)
                 ungreyelement.style = "background-color:#0074D9"
+                ungreyelement.style.margin =" 3px 3px"
                 ungreyelement.classList.remove("greyed")
             }
             //grey all elements with clickedId < id < history_length
             for(var i = clickedId+1; i < history_length; i++){
                 var greyedelement = document.getElementById(i)
                 greyedelement.style = "background-color:grey"
+                greyedelement.style.margin =" 3px 3px"
+
                 greyedelement.classList.add("greyed")
             }
         }

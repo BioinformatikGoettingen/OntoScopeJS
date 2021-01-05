@@ -1,23 +1,18 @@
 export default class OntoCls {
 
-  constructor(json, connectorArray) {
+  constructor(json, connectorArray, url = undefined) {
     this.json = json;
     this.oc_children = json.children;
     this.oc_annotations = json.annotations;
     this.oc_name = json.name;
-    //console.log("json")
-    //console.log(json)
     var tmp = false
     for(var annotation of this.json.annotations) {
       if(annotation.name === 'label' && annotation.language === '') {
         tmp = true
         this.oc_label = annotation.value
-        //console.log("this is gonna be used")
-        //console.log(annotation)
       }
     }
     if(!tmp) {
-      //console.log("or this gonna be used")
       this.oc_label = json.name
     }
     
@@ -30,6 +25,7 @@ export default class OntoCls {
       this.oc_properties = null;
     }
     this.connectorArray = connectorArray
+    this.url = url
   }
 
   get id() {
@@ -37,12 +33,10 @@ export default class OntoCls {
   }
 
   get properties() {
-    //console.log("get properties for " + this.label)
 
     if (this.oc_shell) {
-      //console.log("hier getproperties")
       return this.fillCls().then(data => {
-          return this.oc_properties
+        return this.oc_properties
       });
     }else {
         return this.oc_properties
@@ -64,20 +58,20 @@ export default class OntoCls {
     }
   }
 
-    get parents() {
-      //console.log("get parents for " + this.label)
-      if (!this.oc_shell && this.oc_parents.length == 0) {
-        return null;
-      }
-      if (this.oc_shell) {
-        //console.log("hier getparents")
-        return this.fillCls().then(data => {
-          return this.oc_parents
-        });
-      }else {
-        return this.oc_parents
-      }
+  get parents() {
+    //console.log("get parents for " + this.label)
+    if (!this.oc_shell && this.oc_parents.length == 0) {
+      return null;
     }
+    if (this.oc_shell) {
+      //console.log("hier getparents")
+      return this.fillCls().then(data => {
+        return this.oc_parents
+      });
+    }else {
+      return this.oc_parents
+    }
+  }
 
 
   get label() {
@@ -94,56 +88,61 @@ export default class OntoCls {
         }
       })
   }
-  get_color_cat() {
-    //console.log("get colocat for" + this.id)
+  async get_color_cat() {
+    console.log("get colocat for" + this.id)
     var genericCallback = this.connectorArray[0].getColorCatOfCls(this) 
     var prev_callback = genericCallback
     for(var i = 1; i<this.connectorArray.length; i++) {
-      var pluginCallback = this.connectorArray[i].getColorCatOfCls(this, prev_callback)
-      prev_callback = pluginCallback
-    }
-    return prev_callback.then(data => {
-      //console.log(data)
-      //console.log("data")
-      if(data == undefined) {
-        return "undefined"
-      }else {
-        return data
+      var pluginCallback = await this.connectorArray[i].getColorCatOfCls(this, prev_callback)
+      if(pluginCallback != undefined) {
+        prev_callback = pluginCallback
       }
-    }) 
+      
+    }
+    if(prev_callback == undefined) {
+      return "undefined"
+    } else {
+      return prev_callback
+    }
   }
 
-  get_color() {
-    //console.log("get color for: " + this.id)
+  async get_color() {
+    console.log("get color for" +  this.id)
     var genericCallback = this.connectorArray[0].get_node_color(this)
     var prev_callback = genericCallback
-    for(var i = 0; i < this.connectorArray.length; i++) {
-      var pluginCallback = this.connectorArray[i].get_node_color(this, prev_callback)
-      prev_callback = pluginCallback
+    for(var i = 1; i < this.connectorArray.length; i++) {
+      var pluginCallback = await this.connectorArray[i].get_node_color(this)
+      if(pluginCallback != undefined) {
+        prev_callback = pluginCallback
+      }
     }
-    return prev_callback.then(data => {
-      return data
-    })
+    if(prev_callback == undefined) {
+      return "undefined"
+    } else {
+      return prev_callback
+    }
   }
-
+  //check if class need to be filled
   async fillCls() {
-    //console.log("filling class " + this.id)
-    const promise = await this.connectorArray[0].get_cls_data(this)
-    if(promise != undefined) {
-      var data =  promise.data;
-      this.fillWithTemplate(data)
+    if(this.oc_shell){
+      const promise = await this.connectorArray[0].get_cls_data(this)
+      if(promise != undefined) {
+        var data =  promise.data;
+        this.fillWithTemplate(data)
+      }
+      return promise
+    }else {
+      return this
     }
-    return promise
-
   }
 
   fillWithTemplate(data) {
-    //console.log("filling2 class " + this.id)
+    //console.log("filling class " + this.id)
 
     const json_cls = data
     this.oc_children = []
     for (let c of json_cls.children) {
-      this.oc_children.push(this.connectorArray[0].createNewOntoCs(c))
+      this.oc_children.push(this.connectorArray[0].createNewOntoCs(c, this.url))
     }
     this.oc_shell = json_cls.shell;
     this.oc_annotations = json_cls.annotations;
@@ -155,7 +154,7 @@ export default class OntoCls {
       for (let c of json_cls.properties){
         this.oc_properties.push({
           "property" : c.property,
-          "target" : this.connectorArray[0].createNewOntoCs(c.target)
+          "target" : this.connectorArray[0].createNewOntoCs(c.target, this.url)
         })
       }
     }
@@ -163,7 +162,7 @@ export default class OntoCls {
     this.oc_parents = []
 
     for (let c of json_cls.parents){
-      this.oc_parents.push(this.connectorArray[0].createNewOntoCs(c))
+      this.oc_parents.push(this.connectorArray[0].createNewOntoCs(c, this.url))
     }
     // this.oc_parents = json_cls.parents;
     this.json = json_cls

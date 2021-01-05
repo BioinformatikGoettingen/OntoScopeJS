@@ -6,11 +6,7 @@ class genericConnector {
 
   constructor() {
     var urlParams = new URLSearchParams(window.location.search);
-    if(urlParams.get("url")){
-      this.url = urlParams.get("url")
-    }else {
-      this.url = undefined
-    }
+    this.url = []
     this.edgecolorpool =["#f98d06","#fdcd04","#f0ff00","f6c398","#DAF7A6","#581845"]  
     this.nodecolorpool = ["#001f3f","#0074D9","#7FDBFF","#39CCCC","#3D9970","#2ECC40","#01FF70","#FFDC00","#FF851B","#FF4136","#85144b","#F012BE","#B10DC9","#111111","#AAAAAA","#DDDDDD"]
     this.edge_color =[]
@@ -23,7 +19,6 @@ class genericConnector {
 
   //ordnet jeder edge art nach und nach eine Farbe zu
   get_edge_color(edge_type) {
-    //console.log("hier get edge color; generic connector")
     if(edge_type in this.edge_color) {
       return this.edge_color[edge_type]
     }else {
@@ -34,45 +29,40 @@ class genericConnector {
     
   }
   async search_for_class(searchString) {
-    axios.defaults.headers = {
-        'Accept': 'application/json'
-    };
-
-    const response = await axios.get(this.url + "/functions/basic/searchCls/" + searchString)
-    //TODO if their is no result, repeat the search once with wildcard
-    let result_cls = []
-    var data = response.data.entities[0]
-    for (let jsonCls of response.data.entities) {
-        let cls = this.createNewOntoCs(jsonCls)
-        cls.fillWithTemplate(data)
-        result_cls.push(cls)
-    }
-    return result_cls
-  }
-  //returns the results in an array
-  async first_search(searchString) {
+    var multi_result = {}
+    for(let urlexamp of this.url) {
       axios.defaults.headers = {
-          'Accept': 'application/json'
+        'Accept': 'application/json'
       };
-      const response = await axios.get(this.url +"/functions/basic/searchCls/" + searchString)
-      console.log(this.url +"/functions/basic/searchCls/" + searchString + "*")
-      console.log(response)
+      console.log(urlexamp + "/functions/basic/searchCls/" + searchString)
+      const response = await axios.get(urlexamp + "/functions/basic/searchCls/" + searchString).catch(err => {
+        console.log(err)
+      })
       let result_cls = []
-
-      for (let jsonCls of response.data.entities) {
-        var data = jsonCls;
-          let cls = this.createNewOntoCs(jsonCls)
-          //fill with template lite, das nur das label und den namen und die annotations übernimt, aber keine e
-          // eigene Anfrage an den Server stellt, somit sollte die Performance deutlich verbessert werden
-
-
-          //cls.fillCls()
+      if(response) {
+        for (let jsonCls of response.data.entities) {
+          let cls = this.createNewOntoCs(jsonCls, urlexamp)
+          cls.fillWithTemplate(jsonCls)
           result_cls.push(cls)
+        }
+      }else {
+        const response_with_wildcard = await axios.get(urlexamp + "/functions/basic/searchCls/" + searchString + "*").catch(err => {
+          console.log(err)
+        })
+        if(response_with_wildcard) {
+          var data = response_with_wildcard.data.entities[0]
+          for (let jsonCls of response_with_wildcard.data.entities) {
+            let cls = this.createNewOntoCs(jsonCls, urlexamp)
+            cls.fillWithTemplate(data)
+            result_cls.push(cls)
+          }
+        }
       }
-      //console.log(result_cls)
-      return result_cls
+      multi_result[urlexamp] = result_cls
+    }
+    return multi_result
+    
   }
-
   async get_cls_data(Cls) {
     try {
       var cls_id = Cls.id;
@@ -80,9 +70,9 @@ class genericConnector {
       axios.defaults.headers = {
           'Accept': 'application/json'
       };
-      console.log(this.url + "/cls/" + cls_id + "?ns=" + namespace)
+      console.log(Cls.url + "/cls/" + cls_id + "?ns=" + namespace)
       let response = await axios({
-          url: this.url + "/cls/" + cls_id + "?ns=" + namespace, // add also (encoded) NS
+          url: Cls.url + "/cls/" + cls_id + "?ns=" + namespace, // add also (encoded) NS
 
           method: "get",
           timeout: 4000
@@ -98,8 +88,8 @@ class genericConnector {
     return undefined
   }
 
-  createNewOntoCs(json) {
-    let cls = new OntoCls(json, store.state.connectorArray)
+  createNewOntoCs(json, url = undefined) {
+    let cls = new OntoCls(json, store.state.connectorArray, url)
     return cls
   }
 }
