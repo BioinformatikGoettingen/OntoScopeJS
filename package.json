@@ -16,7 +16,7 @@
     "dom-to-image": "^2.6.0",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
-    "sockjs": "^0.3.19",
+    "sockjs": "^0.3.20",
     "vue": "^2.6.6",
     "vue-cytoscape": "^0.2.7",
     "vue-popperjs": "^2.3.0",
