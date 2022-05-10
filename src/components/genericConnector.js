@@ -28,12 +28,26 @@ class genericConnector {
     }
     
   }
-  async search_for_class(searchString) {
+
+  async search_for_class(searchString, is_id=false) {
     var multi_result = {}
     for(let urlexamp of this.url) {
       axios.defaults.headers = {
         'Accept': 'application/json'
       };
+
+      if (is_id) {
+        const response = await axios.get(urlexamp + "/cls/" + searchString).catch(err => {
+          console.log("Error searching with id", err)
+        })
+        if(response) {
+            let cls = this.createNewOntoCs(response.data, urlexamp)
+            cls.fillWithTemplate(response.data)
+            multi_result[urlexamp] = [cls]
+        }
+        continue
+      }
+
       console.log(urlexamp + "/functions/basic/searchCls/" + searchString)
       const response = await axios.get(urlexamp + "/functions/basic/searchCls/" + searchString).catch(err => {
         console.log(err)

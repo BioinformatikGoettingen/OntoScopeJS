@@ -480,8 +480,8 @@ export default {
         cy.endBatch();
         cy.fit();
     },
-    async search_for_class(searchString) {
-      var searchedResult = await store.state.connectorArray[0].search_for_class(searchString);
+    async search_for_class(searchString, is_id=false) {
+      var searchedResult = await store.state.connectorArray[0].search_for_class(searchString, is_id);
       var cytoscape = this.$cytoscape.instance;
       var check_for_results = false
       var result_counter = 0
@@ -581,12 +581,18 @@ export default {
     async load_class_from_url() {
 
       var urlParams = new URLSearchParams(window.location.search);
+      var searchedResult = undefined;
       var searchString = urlParams.get("defaultNode")
+      var searchId = urlParams.get("defaultId")
       if(searchString) {
-        var searchedResult = await store.state.connectorArray[0].search_for_class(searchString);
+        searchedResult = await store.state.connectorArray[0].search_for_class(searchString);
+      } else if (searchId) {
+        searchedResult = await store.state.connectorArray[0].search_for_class(searchId, true);
+      }
+
+      if (searchedResult) {
         var cytoscape = this.$cytoscape.instance;
         var cls = searchedResult[Object.keys(searchedResult)[0]][0]
-        // var cls = searchedResult[0]
         cls.fillCls();
         add_data(cls, cytoscape)
       }
