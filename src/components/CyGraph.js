@@ -585,7 +585,8 @@ export default {
       if(searchString) {
         var searchedResult = await store.state.connectorArray[0].search_for_class(searchString);
         var cytoscape = this.$cytoscape.instance;
-        var cls = searchedResult[0]
+        var cls = searchedResult[Object.keys(searchedResult)[0]][0]
+        // var cls = searchedResult[0]
         cls.fillCls();
         add_data(cls, cytoscape)
       }
